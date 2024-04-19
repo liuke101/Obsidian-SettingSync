@@ -1,6 +1,6 @@
 # ObsidianSettingSync
 
-用于Obsidian多仓库配置同步
+用于Obsidian多仓库配置同步，**请以管理员模式运行！**
 ![image](https://github.com/liuke101/Obsidian-SettingSync/assets/63388681/9c594586-dbc4-4548-82b5-d0b9a5628544)
 
 输入步骤：
