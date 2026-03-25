@@ -1,0 +1,156 @@
+<Window x:Class="ObsidianSettingSync.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Obsidian Setting Sync"
+        Height="720"
+        Width="1080"
+        MinWidth="900"
+        MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Bahnschrift">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="AppBackground" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FFF7F1E8" Offset="0.0" />
+            <GradientStop Color="#FFE9EFE6" Offset="0.45" />
+            <GradientStop Color="#FFD7E2F0" Offset="1.0" />
+        </LinearGradientBrush>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="18,12" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="Background" Value="#FF0B5D6B" />
+            <Setter Property="BorderBrush" Value="#FF0B5D6B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="12" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF127A8A" />
+                                <Setter Property="BorderBrush" Value="#FF127A8A" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF094A55" />
+                                <Setter Property="BorderBrush" Value="#FF094A55" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#FF5C6F78" />
+            <Setter Property="BorderBrush" Value="#FF5C6F78" />
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="0,4,8,4" />
+            <Setter Property="BorderBrush" Value="#FF9CB6BE" />
+            <Setter Property="BorderThickness" Value="1.5" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource AppBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Margin="28" Padding="24" CornerRadius="22" Background="#EFFFFFFF" BorderBrush="#55FFFFFF" BorderThickness="1">
+            <StackPanel>
+                <TextBlock Text="Obsidian Setting Sync" FontSize="40" FontWeight="Bold" Foreground="#FF123B44" />
+                <TextBlock Margin="0,10,0,0" Text="多仓库 .Obsidian 配置同步工具（符号链接）" FontSize="18" Foreground="#FF2B4D57" />
+                <Border Margin="0,18,0,0" Padding="14" CornerRadius="10" Background="#FFFFF2C9" BorderBrush="#FFE4C576" BorderThickness="1">
+                    <TextBlock Text="请使用管理员权限运行。默认建议使用创建符号链接模式。" Foreground="#FF6B4A00" FontSize="14" TextWrapping="Wrap" />
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="28,0,28,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2.1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" CornerRadius="20" Background="#E8FFFFFF" Padding="24" Margin="0,0,16,0">
+                <Grid>
+                    <Grid x:Name="HomePanel" Visibility="Visible">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="请选择要执行的操作" FontSize="26" FontWeight="SemiBold" Foreground="#FF1E4A54" Margin="0,0,0,20" />
+                        <WrapPanel Grid.Row="1" Margin="0,0,0,12">
+                            <Button x:Name="CreateModeButton" Content="创建软连接" Width="220" Height="64" Style="{StaticResource PrimaryButton}" Click="CreateModeButton_OnClick" />
+                            <Button x:Name="DeleteModeButton" Content="删除软连接" Width="220" Height="64" Style="{StaticResource SecondaryButton}" Click="DeleteModeButton_OnClick" />
+                        </WrapPanel>
+                        <TextBlock Grid.Row="2" Text="点击后将进入路径输入步骤。每一步都会弹出确认对话框，避免误操作。" FontSize="15" Foreground="#FF43606A" TextWrapping="Wrap" />
+                    </Grid>
+
+                    <Grid x:Name="OperationPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="StepTitleText" Text="步骤：选择路径" FontSize="26" FontWeight="SemiBold" Foreground="#FF1E4A54" Margin="0,0,0,14" />
+
+                        <TextBlock Grid.Row="1" Text="目标仓库 .Obsidian 路径" FontSize="14" Foreground="#FF3C5D66" />
+                        <DockPanel Grid.Row="1" Margin="0,28,0,10">
+                            <Button Width="120" DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="选择目录" Click="BrowseDestinationButton_OnClick" />
+                            <TextBox x:Name="DestinationPathTextBox" Height="42" VerticalContentAlignment="Center" />
+                        </DockPanel>
+
+                        <TextBlock Grid.Row="2" Text="源仓库 .Obsidian 路径" FontSize="14" Foreground="#FF3C5D66" />
+                        <DockPanel Grid.Row="2" Margin="0,28,0,16">
+                            <Button Width="120" DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="选择目录" Click="BrowseSourceButton_OnClick" />
+                            <TextBox x:Name="SourcePathTextBox" Height="42" VerticalContentAlignment="Center" />
+                        </DockPanel>
+
+                        <WrapPanel Grid.Row="3" Margin="0,6,0,0">
+                            <Button x:Name="ExecuteButton" Width="170" Height="54" Content="执行" Style="{StaticResource PrimaryButton}" Click="ExecuteButton_OnClick" />
+                            <Button x:Name="BackButton" Width="170" Height="54" Content="返回" Style="{StaticResource SecondaryButton}" Click="BackButton_OnClick" />
+                        </WrapPanel>
+
+                        <TextBlock Grid.Row="4" Margin="0,16,0,0" Text="提示：支持直接粘贴路径，也可点击“选择目录”。建议路径指向仓库内的 .Obsidian 文件夹。" TextWrapping="Wrap" FontSize="13" Foreground="#FF516A72" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" CornerRadius="20" Background="#E6FFFFFF" Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="执行日志" FontSize="22" FontWeight="SemiBold" Foreground="#FF1E4A54" Margin="0,0,0,14" />
+                    <ListBox Grid.Row="1" x:Name="LogListBox" FontSize="13" BorderThickness="0" Background="#FFF9FCFD" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Margin="28,0,28,24" CornerRadius="14" Padding="12" Background="#99FFFFFF">
+            <TextBlock Text="建议执行顺序：先创建软连接；若要还原再执行删除软连接。" Foreground="#FF345862" FontSize="13"/>
+        </Border>
+    </Grid>
+</Window>
