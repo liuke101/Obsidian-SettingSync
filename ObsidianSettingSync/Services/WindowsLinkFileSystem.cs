@@ -29,13 +29,23 @@ public sealed class WindowsLinkFileSystem : ILinkFileSystem
         File.CreateSymbolicLink(destinationPath, sourcePath);
     }
 
-    public void DeleteDirectory(string path)
+    public void DeleteDirectory(string path, bool recursive = false)
     {
-        Directory.Delete(path, recursive: false);
+        Directory.Delete(path, recursive);
     }
 
     public void DeleteFile(string path)
     {
         File.Delete(path);
+    }
+
+    public string[] GetDirectories(string path)
+    {
+        return Directory.GetDirectories(path);
+    }
+
+    public string[] GetFiles(string path)
+    {
+        return Directory.GetFiles(path);
     }
 }

@@ -74,8 +74,8 @@
 
         <Border Margin="28" Padding="24" CornerRadius="22" Background="#EFFFFFFF" BorderBrush="#55FFFFFF" BorderThickness="1">
             <StackPanel>
-                <TextBlock Text="Obsidian Setting Sync" FontSize="40" FontWeight="Bold" Foreground="#FF123B44" />
-                <TextBlock Margin="0,10,0,0" Text="多仓库 .Obsidian 配置同步工具（符号链接）" FontSize="18" Foreground="#FF2B4D57" />
+                <TextBlock Text="Setting Sync" FontSize="40" FontWeight="Bold" Foreground="#FF123B44" />
+                <TextBlock Margin="0,10,0,0" Text="配置同步工具（符号链接）" FontSize="18" Foreground="#FF2B4D57" />
                 <Border Margin="0,18,0,0" Padding="14" CornerRadius="10" Background="#FFFFF2C9" BorderBrush="#FFE4C576" BorderThickness="1">
                     <TextBlock Text="请使用管理员权限运行。默认建议使用创建符号链接模式。" Foreground="#FF6B4A00" FontSize="14" TextWrapping="Wrap" />
                 </Border>
@@ -101,7 +101,18 @@
                             <Button x:Name="CreateModeButton" Content="创建软连接" Width="220" Height="64" Style="{StaticResource PrimaryButton}" Click="CreateModeButton_OnClick" />
                             <Button x:Name="DeleteModeButton" Content="删除软连接" Width="220" Height="64" Style="{StaticResource SecondaryButton}" Click="DeleteModeButton_OnClick" />
                         </WrapPanel>
-                        <TextBlock Grid.Row="2" Text="点击后将进入路径输入步骤。每一步都会弹出确认对话框，避免误操作。" FontSize="15" Foreground="#FF43606A" TextWrapping="Wrap" />
+                        <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                            <TextBlock Text="点击后将进入路径输入步骤。每一步都会弹出确认对话框，避免误操作。" FontSize="15" Foreground="#FF43606A" TextWrapping="Wrap" />
+                            <CheckBox x:Name="IsObsidianModeCheckBox" Content="Obsidian 仓库同步模式 (默认处理 .Obsidian 及其它附加目录)" FontSize="15" Foreground="#FF1E4A54" Margin="0,16,0,0" IsChecked="True" />
+                            <StackPanel Margin="0,12,0,0">
+                                <TextBlock Text="附加同步目录（除了 .Obsidian 外的其他顶层目录，以逗号分隔）：" FontSize="14" Foreground="#FF3C5D66" Margin="0,0,0,4"/>
+                                <TextBox x:Name="AdditionalDirsTextBox" Height="36" VerticalContentAlignment="Center" Text="zip" />
+                            </StackPanel>
+                            <StackPanel Margin="0,12,0,0">
+                                <TextBlock Text="排除列表（不对以下文件/目录进行软链接，以逗号分隔）：" FontSize="14" Foreground="#FF3C5D66" Margin="0,0,0,4"/>
+                                <TextBox x:Name="ExclusionsTextBox" Height="36" VerticalContentAlignment="Center" Text="workspace.json" />
+                            </StackPanel>
+                        </StackPanel>
                     </Grid>
 
                     <Grid x:Name="OperationPanel" Visibility="Collapsed">
@@ -115,13 +126,13 @@
 
                         <TextBlock x:Name="StepTitleText" Text="步骤：选择路径" FontSize="26" FontWeight="SemiBold" Foreground="#FF1E4A54" Margin="0,0,0,14" />
 
-                        <TextBlock Grid.Row="1" Text="目标仓库 .Obsidian 路径" FontSize="14" Foreground="#FF3C5D66" />
+                        <TextBlock Grid.Row="1" Text="目标路径" FontSize="14" Foreground="#FF3C5D66" />
                         <DockPanel Grid.Row="1" Margin="0,28,0,10">
                             <Button Width="120" DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="选择目录" Click="BrowseDestinationButton_OnClick" />
                             <TextBox x:Name="DestinationPathTextBox" Height="42" VerticalContentAlignment="Center" />
                         </DockPanel>
 
-                        <TextBlock Grid.Row="2" Text="源仓库 .Obsidian 路径" FontSize="14" Foreground="#FF3C5D66" />
+                        <TextBlock Grid.Row="2" Text="源路径" FontSize="14" Foreground="#FF3C5D66" />
                         <DockPanel Grid.Row="2" Margin="0,28,0,16">
                             <Button Width="120" DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}" Content="选择目录" Click="BrowseSourceButton_OnClick" />
                             <TextBox x:Name="SourcePathTextBox" Height="42" VerticalContentAlignment="Center" />
@@ -132,7 +143,7 @@
                             <Button x:Name="BackButton" Width="170" Height="54" Content="返回" Style="{StaticResource SecondaryButton}" Click="BackButton_OnClick" />
                         </WrapPanel>
 
-                        <TextBlock Grid.Row="4" Margin="0,16,0,0" Text="提示：支持直接粘贴路径，也可点击“选择目录”。建议路径指向仓库内的 .Obsidian 文件夹。" TextWrapping="Wrap" FontSize="13" Foreground="#FF516A72" />
+                        <TextBlock Grid.Row="4" Margin="0,16,0,0" Text="提示：支持直接粘贴路径，也可点击“选择目录”。" TextWrapping="Wrap" FontSize="13" Foreground="#FF516A72" />
                     </Grid>
                 </Grid>
             </Border>

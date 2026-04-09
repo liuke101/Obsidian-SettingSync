@@ -13,67 +13,114 @@ public sealed class SyncService
         _fileSystem = fileSystem;
     }
 
-    public static IReadOnlyList<string> ConfigFileDirectories { get; } =
-    [
-        "plugins",
-        "snippets",
-        "themes"
-    ];
-
-    public static IReadOnlyList<string> JsonConfigFiles { get; } =
-    [
-        "app.json",
-        "appearance.json",
-        "backlink.json",
-        "bookmarks.json",
-        "canvas.json",
-        "community-plugins.json",
-        "core-plugins.json",
-        "core-plugins-migration.json",
-        "daily-notes.json",
-        "file-recovery.json",
-        "graph.json",
-        "hotkeys.json",
-        "note-composer.json",
-        "page-preview.json",
-        "templates.json",
-        "types.json"
-        //"workspace.json" 该文件不进行软链接
-    ];
-
-    public IReadOnlyList<OperationResult> Execute(SyncOperation operation, string destinationPath, string sourcePath)
+    public IReadOnlyList<OperationResult> Execute(SyncOperation operation, string destinationPath, string sourcePath, bool isObsidianMode = false, HashSet<string>? exclusions = null, HashSet<string>? additionalDirs = null)
     {
         var results = new List<OperationResult>();
+        var excludeSet = exclusions ?? new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+        var extraDirs = additionalDirs ?? new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
         if (operation == SyncOperation.Create)
         {
-            foreach (var directory in ConfigFileDirectories)
+            if (isObsidianMode)
             {
-                var dest = Path.Combine(destinationPath, directory);
-                var src = Path.Combine(sourcePath, directory);
-                results.Add(TryCreate(directory, dest, src, isDirectory: true));
-            }
+                var srcObsidian = Path.Combine(sourcePath, ".obsidian");
+                var destObsidian = Path.Combine(destinationPath, ".obsidian");
+                
+                if (_fileSystem.DirectoryExists(srcObsidian))
+                {
+                    if (!_fileSystem.DirectoryExists(destObsidian))
+                    {
+                        Directory.CreateDirectory(destObsidian);
+                    }
+                    
+                    foreach (var dir in _fileSystem.GetDirectories(srcObsidian))
+                    {
+                        var name = Path.GetFileName(dir);
+                        if (excludeSet.Contains(name)) continue;
+                        results.Add(TryCreate($".obsidian/{name}", Path.Combine(destObsidian, name), dir, true));
+                    }
+                    
+                    foreach (var file in _fileSystem.GetFiles(srcObsidian))
+                    {
+                        var name = Path.GetFileName(file);
+                        if (excludeSet.Contains(name)) continue;
+                        results.Add(TryCreate($".obsidian/{name}", Path.Combine(destObsidian, name), file, false));
+                    }
+                }
+                
+                foreach (var extraDir in extraDirs)
+                {
+                    if (excludeSet.Contains(extraDir)) continue;
 
-            foreach (var file in JsonConfigFiles)
+                    var srcExtra = Path.Combine(sourcePath, extraDir);
+                    if (_fileSystem.DirectoryExists(srcExtra))
+                    {
+                        results.Add(TryCreate(extraDir, Path.Combine(destinationPath, extraDir), srcExtra, true));
+                    }
+                }
+            }
+            else
             {
-                var dest = Path.Combine(destinationPath, file);
-                var src = Path.Combine(sourcePath, file);
-                results.Add(TryCreate(file, dest, src, isDirectory: false));
+                foreach (var dir in _fileSystem.GetDirectories(sourcePath))
+                {
+                    var name = Path.GetFileName(dir);
+                    if (excludeSet.Contains(name)) continue;
+                    results.Add(TryCreate(name, Path.Combine(destinationPath, name), dir, true));
+                }
+                
+                foreach (var file in _fileSystem.GetFiles(sourcePath))
+                {
+                    var name = Path.GetFileName(file);
+                    if (excludeSet.Contains(name)) continue;
+                    results.Add(TryCreate(name, Path.Combine(destinationPath, name), file, false));
+                }
             }
 
             return results;
         }
 
-        foreach (var directory in ConfigFileDirectories)
+        if (isObsidianMode)
         {
-            var path = Path.Combine(destinationPath, directory);
-            results.Add(TryDelete(directory, path, isDirectory: true));
-        }
+            var destObsidian = Path.Combine(destinationPath, ".obsidian");
+            if (_fileSystem.DirectoryExists(destObsidian))
+            {
+                foreach (var dir in _fileSystem.GetDirectories(destObsidian))
+                {
+                    var name = Path.GetFileName(dir);
+                    if (excludeSet.Contains(name)) continue;
+                    results.Add(TryDelete($".obsidian/{name}", dir, true));
+                }
+                foreach (var file in _fileSystem.GetFiles(destObsidian))
+                {
+                    var name = Path.GetFileName(file);
+                    if (excludeSet.Contains(name)) continue;
+                    results.Add(TryDelete($".obsidian/{name}", file, false));
+                }
+            }
 
-        foreach (var file in JsonConfigFiles)
+            foreach (var extraDir in extraDirs)
+            {
+                if (excludeSet.Contains(extraDir)) continue;
+
+                var destExtra = Path.Combine(destinationPath, extraDir);
+                results.Add(TryDelete(extraDir, destExtra, true));
+            }
+        }
+        else
         {
-            var path = Path.Combine(destinationPath, file);
-            results.Add(TryDelete(file, path, isDirectory: false));
+            foreach (var dir in _fileSystem.GetDirectories(destinationPath))
+            {
+                var name = Path.GetFileName(dir);
+                if (excludeSet.Contains(name)) continue;
+                results.Add(TryDelete(name, dir, true));
+            }
+
+            foreach (var file in _fileSystem.GetFiles(destinationPath))
+            {
+                var name = Path.GetFileName(file);
+                if (excludeSet.Contains(name)) continue;
+                results.Add(TryDelete(name, file, false));
+            }
         }
 
         return results;
@@ -97,19 +144,16 @@ public sealed class SyncService
             {
                 if (!_fileSystem.IsReparsePoint(destinationPath))
                 {
-                    return new OperationResult(name, false, $"{name}: 目标目录已存在且不是软链接");
+                    _fileSystem.DeleteDirectory(destinationPath, recursive: true);
                 }
-
-                _fileSystem.DeleteDirectory(destinationPath);
+                else
+                {
+                    _fileSystem.DeleteDirectory(destinationPath);
+                }
             }
 
             if (!isDirectory && _fileSystem.FileExists(destinationPath))
             {
-                if (!_fileSystem.IsReparsePoint(destinationPath))
-                {
-                    return new OperationResult(name, false, $"{name}: 目标文件已存在且不是软链接");
-                }
-
                 _fileSystem.DeleteFile(destinationPath);
             }
 

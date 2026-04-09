@@ -45,7 +45,7 @@ public partial class MainWindow : Window
 
     private void BrowseDestinationButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (!Confirm("选择目标仓库 .Obsidian 文件夹，是否继续？"))
+        if (!Confirm("选择目标文件夹，是否继续？"))
         {
             return;
         }
@@ -59,7 +59,7 @@ public partial class MainWindow : Window
 
     private void BrowseSourceButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (!Confirm("选择源仓库 .Obsidian 文件夹，是否继续？"))
+        if (!Confirm("选择源文件夹，是否继续？"))
         {
             return;
         }
@@ -99,17 +99,36 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (!LooksLikeObsidianFolder(destinationPath) || !LooksLikeObsidianFolder(sourcePath))
+        var isObsidianMode = IsObsidianModeCheckBox.IsChecked == true;
+
+        if (isObsidianMode)
         {
-            if (!Confirm("所选目录不以 .Obsidian 结尾，仍然继续执行吗？"))
+            if (!Directory.Exists(Path.Combine(destinationPath, ".obsidian")) && !Directory.Exists(Path.Combine(destinationPath, ".Obsidian")))
             {
+                System.Windows.MessageBox.Show("目标路径非 Obsidian 仓库（未找到 .Obsidian 文件夹）。", "输入校验", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Directory.Exists(Path.Combine(sourcePath, ".obsidian")) && !Directory.Exists(Path.Combine(sourcePath, ".Obsidian")))
+            {
+                System.Windows.MessageBox.Show("源路径非 Obsidian 仓库（未找到 .Obsidian 文件夹）。", "输入校验", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
 
         LogListBox.Items.Clear();
 
-        var results = _syncService.Execute(_currentOperation, destinationPath, sourcePath);
+        var exclusions = ExclusionsTextBox.Text
+            .Split(new[] { ',', '，' }, System.StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .ToHashSet(System.StringComparer.OrdinalIgnoreCase);
+
+        var additionalDirs = AdditionalDirsTextBox.Text
+            .Split(new[] { ',', '，' }, System.StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .ToHashSet(System.StringComparer.OrdinalIgnoreCase);
+
+        var results = _syncService.Execute(_currentOperation, destinationPath, sourcePath, isObsidianMode, exclusions, additionalDirs);
         foreach (var result in results)
         {
             LogListBox.Items.Add(result.Message);
@@ -163,17 +182,11 @@ public partial class MainWindow : Window
     {
         using var dialog = new Forms.FolderBrowserDialog
         {
-            Description = "请选择 .Obsidian 文件夹",
+            Description = "请选择文件夹",
             ShowNewFolderButton = false,
             UseDescriptionForTitle = true
         };
 
         return dialog.ShowDialog() == Forms.DialogResult.OK ? dialog.SelectedPath : null;
-    }
-
-    private static bool LooksLikeObsidianFolder(string path)
-    {
-        return path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            .EndsWith(".Obsidian", System.StringComparison.OrdinalIgnoreCase);
     }
 }

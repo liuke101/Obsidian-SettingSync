@@ -7,6 +7,8 @@ public interface ILinkFileSystem
     bool IsReparsePoint(string path);
     void CreateDirectorySymbolicLink(string destinationPath, string sourcePath);
     void CreateFileSymbolicLink(string destinationPath, string sourcePath);
-    void DeleteDirectory(string path);
+    void DeleteDirectory(string path, bool recursive = false);
     void DeleteFile(string path);
+    string[] GetDirectories(string path);
+    string[] GetFiles(string path);
 }
