@@ -1,0 +1,19 @@
+/* Front-matter */
+/* ---符号颜色 */
+body.unified-cm-highlighting[class*="theme-"] .cm-s-obsidian .cm-hmd-frontmatter.cm-def
+{
+    color:black
+}
+
+/* 键颜色 */
+body.unified-cm-highlighting[class*="theme-"] .cm-s-obsidian .cm-hmd-frontmatter.cm-atom,body.unified-cm-highlighting[class*="theme-"] .cm-s-obsidian .cm-hmd-frontmatter.cm-meta
+{
+    color:black
+}
+
+/* 值颜色 */
+body.unified-cm-highlighting[class*="theme-"] .cm-s-obsidian .cm-hmd-frontmatter,body.unified-cm-highlighting[class*="theme-"] .cm-s-obsidian .cm-hmd-frontmatter.cm-number,body.unified-cm-highlighting[class*="theme-"] .cm-s-obsidian .cm-hmd-frontmatter.cm-string
+{
+    color:dodgerblue
+}
+

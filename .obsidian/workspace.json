@@ -1,0 +1,323 @@
+{
+  "main": {
+    "id": "61cd782a76e20275",
+    "type": "split",
+    "children": [
+      {
+        "id": "e007a0970e59607a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7984834988d811ab",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "GameDev/校招/其他/【半结构化面试】如何回答 “沟通协调类” 问题？.md",
+                "mode": "source",
+                "backlinks": false,
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "【半结构化面试】如何回答 “沟通协调类” 问题？"
+            }
+          },
+          {
+            "id": "cedeeb8bfa5a58da",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.7.4"
+              },
+              "icon": "lucide-file",
+              "title": "Release Notes 1.7.4"
+            }
+          },
+          {
+            "id": "a1fbb9fb0d5c1d20",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "GameDev/虚幻引擎/01 指南/插件使用/1 解包.md",
+                "mode": "source",
+                "backlinks": false,
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "1 解包"
+            }
+          },
+          {
+            "id": "3129cc5ac35d4f53",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": false
+              },
+              "icon": "lucide-file",
+              "title": "README"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "9bd8ce8f75ac3b6a",
+    "type": "split",
+    "children": [
+      {
+        "id": "8cb567a84fd74f78",
+        "type": "tabs",
+        "dimension": 50.49415992812219,
+        "children": [
+          {
+            "id": "e2ab25dcda4c975e",
+            "type": "leaf",
+            "state": {
+              "type": "quiet-outline",
+              "state": {},
+              "icon": "lines-of-text",
+              "title": "Quiet Outline"
+            }
+          },
+          {
+            "id": "aeb0443812d77d7f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "GameDev/校招/其他/【半结构化面试】如何回答 “沟通协调类” 问题？.md"
+              },
+              "icon": "lucide-list",
+              "title": "【半结构化面试】如何回答 “沟通协调类” 问题？ 的大纲"
+            }
+          },
+          {
+            "id": "6d57c2cf774fe47a",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "32912902d89e5c6d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          },
+          {
+            "id": "bca03089e022db86",
+            "type": "leaf",
+            "state": {
+              "type": "file-properties",
+              "state": {
+                "file": "GameDev/校招/其他/【半结构化面试】如何回答 “沟通协调类” 问题？.md"
+              },
+              "icon": "lucide-info",
+              "title": "【半结构化面试】如何回答 “沟通协调类” 问题？的笔记属性"
+            }
+          }
+        ]
+      },
+      {
+        "id": "86c1fb5dd4a1903e",
+        "type": "tabs",
+        "dimension": 17.969451931716083,
+        "children": [
+          {
+            "id": "3bd810f453370271",
+            "type": "leaf",
+            "state": {
+              "type": "recent-files",
+              "state": {},
+              "icon": "clock",
+              "title": "Recent Files"
+            }
+          }
+        ]
+      },
+      {
+        "id": "174e81578cacda94",
+        "type": "tabs",
+        "dimension": 31.536388140161726,
+        "children": [
+          {
+            "id": "84dc87271b3246ef",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 325.5
+  },
+  "right": {
+    "id": "22f3fbdf8409cb1f",
+    "type": "split",
+    "children": [
+      {
+        "id": "53d68b414f38e87e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "053e88a94601ef52",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "7ccb0980ed8fbeda",
+            "type": "leaf",
+            "state": {
+              "type": "git-history-view",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "git-history-view"
+            }
+          },
+          {
+            "id": "cfa3c18c4bbc44f6",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "README.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "README 的反向链接列表"
+            }
+          },
+          {
+            "id": "25d5804186213c3f",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "README.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "README 的出链列表"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "bases:新建数据库": false,
+      "canvas:新建白板": false,
+      "command-palette:打开命令面板": true,
+      "obsidian42-brat:BRAT": false,
+      "oz-clear-unused-images:清除未使用的图像": false,
+      "obsidian-git:Open Git source control": false,
+      "i18n:common.i18n": false,
+      "obsidian-local-images-plus:Local Images Plus  0.16.4\r\nLocalize attachments (plugin folder)": false,
+      "omnisearch:Omnisearch": false,
+      "templater-obsidian:Templater": false,
+      "pexels-banner:🚩 Pixel Banner Menu": false
+    }
+  },
+  "active": "3129cc5ac35d4f53",
+  "lastOpenFiles": [
+    "GameDev/逆向工程/汇编语言.md",
+    "README.md",
+    "GameDev/校招/其他/许继.md",
+    "GameDev/校招/其他/国企.md",
+    "GameDev/虚幻引擎/01 指南/插件使用/1 解包.md",
+    "GameDev/校招/行测/推理题.md",
+    "GameDev/校招/01 C++八股.md",
+    "GameDev/校招/行测/图形推理总结.md",
+    "GameDev/校招/行测/题型.md",
+    "GameDev/虚幻引擎/02 UE++/0 蓝图精粹.md",
+    "编程/1 C++/3 Effective C++.md",
+    "虚幻引擎/03 Gameplay/GAS/GAS精粹.md",
+    "虚幻引擎/02 UE++/2 类型.md",
+    "编程/1 C++/1 C++ Primer.md",
+    "虚幻引擎/02 UE++/4 委托.md",
+    "虚幻引擎/06 网络/1 UE网络精粹.md",
+    "编程/1 C++/2 STL标准库.md",
+    "zBuffer/未命名.md",
+    "编程/3 设计模式/单例模式总结.md",
+    "虚幻引擎/03 Gameplay/GAS/simpread-【Unreal】虚幻 GAS 系统快速入门.md",
+    "虚幻引擎/03 Gameplay/GAS/GASRPG 笔记.md",
+    "编程/3 设计模式/游戏编程模式.md",
+    "虚幻引擎/02 UE++/8 多线程.md",
+    "虚幻引擎/03 Gameplay/GAS/assets/Pasted image 20231201214824.png",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/ 01 技能激活的代价—Cost 和 Cooldown.md",
+    "虚幻引擎/03 Gameplay/GAS/assets/Pasted image 20231201203631.png",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/ 00 激活技能的几种机制.md",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/虚幻插件 GAS 分析 00 激活技能的几种机制.md",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/d13738d3ef382680141f427bde74c977_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/8fd621ee7dd0c45b86fab3f2b9314a7e_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/0908a6b2d5e91c70b343bda95383eedb_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/7b67a12aadcba2f9f99273ab42e71436_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/3388d61f8a7e07875475558d13e1d0a6_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/1ac0bd86422ef7bd2d17722c082b4a3d_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/36fb866fdb02ac86be2faccbededa78a_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets/44ac062f38a36e85fb71dd05b9519218_MD5.jpg",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿/assets",
+    "虚幻引擎/03 Gameplay/GAS/技术宅阿棍儿",
+    "编程/3 设计模式/游戏编程模式",
+    "虚幻引擎/03 Gameplay/GAS/Images",
+    "编程/1 C++/src/2.Auto",
+    "编程/1 C++/src/1.DeducingTypes",
+    "编程/1 C++/src",
+    "虚幻引擎/02 UE++/蓝图&C++混编/assets",
+    "虚幻引擎/02 UE++/蓝图&C++混编",
+    "zBuffer/assets"
+  ]
+}

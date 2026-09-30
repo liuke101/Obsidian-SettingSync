@@ -1,0 +1,75 @@
+/* 标题行高 */
+.cm-header-1 {
+    line-height: 2em;
+    color: rgb(0, 0, 0); /*字体颜色*/
+    
+    background-color: #f7060640; /*背景颜色--*/
+    
+    border-radius: 5px; /*四边倒圆角--*/
+    
+    padding: 5px 5px; /*文字距边缘的距离--*/
+   
+    /* 底部彩虹条 */
+    /* border-bottom: 2px solid;
+    border-image: linear-gradient(to right, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047, #eeff41, #f9a825, #ff5722) 5; */
+}
+
+.cm-header-2 {
+    line-height: 2em;
+    color: rgb(0, 0, 0);
+    /*--------字体颜色--*/
+    background-color: #f7cb0640;
+    /*--------背景颜色--*/
+    border-radius: 5px;
+    /*--------四边倒圆角--*/
+    padding: 5px 5px;
+    /*--------文字距边缘的距离--*/
+}
+
+.cm-header-3 {
+    line-height: 2em;
+    color: rgb(0, 0, 0);
+    /*--------字体颜色--*/
+    background-color: #06aff740;
+    /*--------背景颜色--*/
+    border-radius: 5px;
+    /*--------四边倒圆角--*/
+    padding: 5px 5px;
+    /*--------文字距边缘的距离--*/
+}
+
+.cm-header-4 {
+    line-height: 2em;
+    color: rgb(0, 0, 0);
+    /*--------字体颜色--*/
+    background-color: #5ef70640;
+    /*--------背景颜色--*/
+    border-radius: 5px;
+    /*--------四边倒圆角--*/
+    padding: 5px 5px;
+    /*--------文字距边缘的距离--*/
+}
+
+.cm-header-5 {
+    line-height: 2em;
+    color: rgb(0, 0, 0);
+    /*--------字体颜色--*/
+    background-color: #1e06f740;
+    /*--------背景颜色--*/
+    border-radius: 5px;
+    /*--------四边倒圆角--*/
+    padding: 5px 5px;
+    /*--------文字距边缘的距离--*/
+}
+
+.cm-header-6 {
+    line-height: 2em;
+    color: rgb(0, 0, 0);
+    /*--------字体颜色--*/
+    background-color: #8706f740;
+    /*--------背景颜色--*/
+    border-radius: 5px;
+    /*--------四边倒圆角--*/
+    padding: 5px 5px;
+    /*--------文字距边缘的距离--*/
+}

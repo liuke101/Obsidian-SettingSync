@@ -1,0 +1,7 @@
+/* 右下状态栏淡出 */
+.status-bar:not(:hover) .status-bar-item {
+    opacity: 0;  /* 隐藏状态字体颜色设置为无色 */
+}
+body:not(.minimal-status-off) .status-bar {
+    background-color: rgba(1 , 1 , 1, 0);  /* 状态栏边框设置为透明 */
+}

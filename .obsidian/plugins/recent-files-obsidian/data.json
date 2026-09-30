@@ -1,0 +1,202 @@
+{
+  "recentFiles": [
+    {
+      "basename": "基本概念",
+      "path": "VibeCoding/基本概念.md"
+    },
+    {
+      "basename": "插件系统",
+      "path": "PTCHV/QwenPaw/插件系统.md"
+    },
+    {
+      "basename": "README",
+      "path": "README.md"
+    },
+    {
+      "basename": "GitHub Copilot CLI",
+      "path": "VibeCoding/CLI/GitHub Copilot CLI.md"
+    },
+    {
+      "basename": "WSL2网络配置（萌新编程日记2.25）",
+      "path": "Clippings/WSL2网络配置（萌新编程日记2.25）.md"
+    },
+    {
+      "basename": "Claude Code",
+      "path": "VibeCoding/CLI/Claude Code.md"
+    },
+    {
+      "basename": "1 插件流",
+      "path": "Tools/Obsidian/1 插件流.md"
+    },
+    {
+      "basename": "01 渲染管线",
+      "path": "图形学/1 图形系统/01 渲染管线.md"
+    },
+    {
+      "basename": "03 光照模型",
+      "path": "图形学/1 图形系统/03 光照模型.md"
+    },
+    {
+      "basename": "02 光栅化",
+      "path": "图形学/1 图形系统/02 光栅化.md"
+    },
+    {
+      "basename": "第一课",
+      "path": "恋爱/第一课.md"
+    },
+    {
+      "basename": "汇编语言",
+      "path": "逆向工程/汇编语言.md"
+    },
+    {
+      "basename": "郁金香逆向",
+      "path": "逆向工程/郁金香逆向.md"
+    },
+    {
+      "basename": "04 计组",
+      "path": "编程/八股/04 计组.md"
+    },
+    {
+      "basename": "1 C++ Primer",
+      "path": "编程/1 C++/1 C++ Primer.md"
+    },
+    {
+      "basename": "2 STL标准库",
+      "path": "编程/1 C++/2 STL标准库.md"
+    },
+    {
+      "basename": "Godot精粹",
+      "path": "Godot/Godot精粹.md"
+    },
+    {
+      "basename": "GDS精粹",
+      "path": "Godot/GDS精粹.md"
+    },
+    {
+      "basename": "0 蓝图精粹",
+      "path": "虚幻引擎/02 UE++/0 蓝图精粹.md"
+    },
+    {
+      "basename": "汇编语言",
+      "path": "GameDev/逆向工程/汇编语言.md"
+    },
+    {
+      "basename": "人月神话",
+      "path": "编程/6 架构/人月神话.md"
+    },
+    {
+      "basename": "UML 类图",
+      "path": "编程/6 架构/UML 类图.md"
+    },
+    {
+      "basename": "代码大全2",
+      "path": "编程/6 架构/代码大全2.md"
+    },
+    {
+      "basename": "01 C++八股",
+      "path": "编程/八股/01 C++八股.md"
+    },
+    {
+      "basename": "1 UE网络精粹",
+      "path": "虚幻引擎/06 网络/1 UE网络精粹.md"
+    },
+    {
+      "basename": "glistening-tendrils-of-vibrant-aurora-borealis-",
+      "path": "zip/Banners/glistening-tendrils-of-vibrant-aurora-borealis-.jpg"
+    },
+    {
+      "basename": "03 操作系统",
+      "path": "编程/八股/03 操作系统.md"
+    },
+    {
+      "basename": "02 虚幻引擎八股",
+      "path": "编程/八股/02 虚幻引擎八股.md"
+    },
+    {
+      "basename": "计网八股",
+      "path": "编程/八股/计网八股.md"
+    },
+    {
+      "basename": "常用语法",
+      "path": "编程/5 LaTeX/常用语法.md"
+    },
+    {
+      "basename": "语法大全",
+      "path": "编程/5 LaTeX/语法大全.md"
+    },
+    {
+      "basename": "simpread-一篇文章学完 Effective C++：条款 & 实践",
+      "path": "编程/1 C++/simpread-一篇文章学完 Effective C++：条款 & 实践.md"
+    },
+    {
+      "basename": "6 Effective Modern C++笔记",
+      "path": "编程/1 C++/6 Effective Modern C++笔记.md"
+    },
+    {
+      "basename": "6 Effective Modern C++",
+      "path": "编程/1 C++/6 Effective Modern C++.md"
+    },
+    {
+      "basename": "工程技术：在智能体优先的世界中利用 Codex",
+      "path": "Clippings/工程技术：在智能体优先的世界中利用 Codex.md"
+    },
+    {
+      "basename": "异步节点",
+      "path": "虚幻引擎/02 UE++/蓝图&C++混编/异步节点.md"
+    },
+    {
+      "basename": "多输入多输出节点",
+      "path": "虚幻引擎/02 UE++/蓝图&C++混编/多输入多输出节点.md"
+    },
+    {
+      "basename": "Superpowers 精粹",
+      "path": "VibeCoding/Skill/Superpowers 精粹.md"
+    },
+    {
+      "basename": "CS基础",
+      "path": "引擎Unity3D/0 CS编程/CS基础.md"
+    },
+    {
+      "basename": "《数据持久化》",
+      "path": "引擎Unity3D/1 Unity精粹/《数据持久化》.md"
+    },
+    {
+      "basename": "《GUI》",
+      "path": "引擎Unity3D/1 Unity精粹/《GUI》.md"
+    },
+    {
+      "basename": "《Unity Primer》",
+      "path": "引擎Unity3D/1 Unity精粹/《Unity Primer》.md"
+    },
+    {
+      "basename": "《编辑器扩展》",
+      "path": "引擎Unity3D/1 Unity精粹/《编辑器扩展》.md"
+    },
+    {
+      "basename": "插件文档",
+      "path": "引擎Unity3D/武理项目/船/插件文档.md"
+    },
+    {
+      "basename": "问题记录",
+      "path": "引擎Unity3D/武理项目/头部/问题记录.md"
+    },
+    {
+      "basename": "【游戏美术文档】Substance Designer 烘培贴图基础流程",
+      "path": "DCC/02 Blender/【游戏美术文档】Substance Designer 烘培贴图基础流程.md"
+    },
+    {
+      "basename": "02 Unity操作指南",
+      "path": "引擎Unity3D/1 Unity精粹/02 Unity操作指南.md"
+    },
+    {
+      "basename": "透视矫正插值",
+      "path": "图形学/6 软渲染器/软光栅/透视矫正插值.md"
+    }
+  ],
+  "omittedPaths": [],
+  "omittedTags": [],
+  "updateOn": "file-open",
+  "omitBookmarks": false,
+  "maxLength": null,
+  "openType": "tab"
+}

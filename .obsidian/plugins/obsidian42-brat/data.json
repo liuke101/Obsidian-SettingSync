@@ -1,0 +1,30 @@
+{
+  "pluginList": [
+    "eondrcode/obsidian-i18n"
+  ],
+  "pluginSubListFrozenVersion": [
+    {
+      "repo": "eondrcode/obsidian-i18n",
+      "version": "latest"
+    }
+  ],
+  "themesList": [
+    {
+      "repo": "sumruler/obsidian-theme-phycat",
+      "lastUpdate": "38061840"
+    }
+  ],
+  "updateAtStartup": false,
+  "updateThemesAtStartup": false,
+  "enableAfterInstall": true,
+  "loggingEnabled": false,
+  "loggingPath": "BRAT-log",
+  "loggingVerboseEnabled": false,
+  "debuggingMode": true,
+  "notificationsEnabled": true,
+  "globalTokenName": "",
+  "personalAccessToken": "",
+  "selectLatestPluginVersionByDefault": false,
+  "allowIncompatiblePlugins": false,
+  "ribbonIconEnabled": false
+}

@@ -1,0 +1,14 @@
+/* Latex Suite插件 括号颜色/括号匹配高亮*/
+.theme-light .latex-suite-color-bracket-0 {
+    color: #52c5ff;
+}
+.theme-light .latex-suite-color-bracket-1 {
+    color: #ffee00;
+}
+.theme-light .latex-suite-color-bracket-2 {
+    color: #00ff22;
+}
+.theme-light .latex-suite-highlighted-bracket,
+.theme-light .latex-suite-highlighted-bracket [class^="latex-suite-color-bracket-"] {
+    background-color: #ffffff4e;
+}

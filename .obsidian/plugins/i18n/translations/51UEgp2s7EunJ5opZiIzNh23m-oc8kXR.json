@@ -1,0 +1,1928 @@
+{
+    "schemaVersion": 1,
+    "metadata": {
+        "theme": "AnuPpuccin",
+        "language": "zh-cn",
+        "version": "1.0.0",
+        "title": "AnuPpuccin",
+        "description": "AnuPpuccin Localization & Tweaks",
+        "author": ""
+    },
+    "dict": [
+        {
+            "type": "name",
+            "source": "AnuPpuccin",
+            "target": "AnuPpuccin"
+        },
+        {
+            "type": "title",
+            "source": "Colors",
+            "target": "颜色"
+        },
+        {
+            "type": "description",
+            "source": "Theme Accent and Flavors, Color Overrides, Extended Color Schemes",
+            "target": "主题强调色与风格、颜色覆盖、扩展配色方案"
+        },
+        {
+            "type": "title",
+            "source": "Light Theme Flavor",
+            "target": "浅色主题风格"
+        },
+        {
+            "type": "description",
+            "source": "Select your preferred light mode flavor",
+            "target": "选择您喜欢的浅色模式风格"
+        },
+        {
+            "type": "label",
+            "source": "Latte",
+            "target": "Latte"
+        },
+        {
+            "type": "label",
+            "source": "Rosé Pine",
+            "target": "Rosé Pine"
+        },
+        {
+            "type": "title",
+            "source": "Dark Theme Flavor",
+            "target": "深色主题风格"
+        },
+        {
+            "type": "description",
+            "source": "Select your preferred dark mode flavor",
+            "target": "选择您喜欢的深色模式风格"
+        },
+        {
+            "type": "label",
+            "source": "Frappe",
+            "target": "Frappe"
+        },
+        {
+            "type": "label",
+            "source": "Macchiato",
+            "target": "Macchiato"
+        },
+        {
+            "type": "label",
+            "source": "Mocha",
+            "target": "Mocha"
+        },
+        {
+            "type": "label",
+            "source": "Mocha Old",
+            "target": "旧版 Mocha"
+        },
+        {
+            "type": "title",
+            "source": "Light Theme Accent",
+            "target": "浅色主题强调色"
+        },
+        {
+            "type": "description",
+            "source": "Select your preferred light theme accent (Defaults to dark theme accent if left empty)",
+            "target": "选择您偏好的浅色主题强调色（留空则默认使用深色主题强调色）"
+        },
+        {
+            "type": "label",
+            "source": "Rosewater",
+            "target": "玫瑰色"
+        },
+        {
+            "type": "label",
+            "source": "Flamingo",
+            "target": "火烈鸟色"
+        },
+        {
+            "type": "label",
+            "source": "Pink",
+            "target": "粉色"
+        },
+        {
+            "type": "label",
+            "source": "Mauve",
+            "target": "淡紫色"
+        },
+        {
+            "type": "label",
+            "source": "Red",
+            "target": "红色"
+        },
+        {
+            "type": "label",
+            "source": "Maroon",
+            "target": "Maroon"
+        },
+        {
+            "type": "label",
+            "source": "Peach",
+            "target": "Peach"
+        },
+        {
+            "type": "label",
+            "source": "Yellow",
+            "target": "Yellow"
+        },
+        {
+            "type": "label",
+            "source": "Green",
+            "target": "Green"
+        },
+        {
+            "type": "label",
+            "source": "Teal",
+            "target": "Teal"
+        },
+        {
+            "type": "label",
+            "source": "Sky",
+            "target": "Sky"
+        },
+        {
+            "type": "label",
+            "source": "Sapphire",
+            "target": "Sapphire"
+        },
+        {
+            "type": "label",
+            "source": "Blue",
+            "target": "Blue"
+        },
+        {
+            "type": "label",
+            "source": "Lavender",
+            "target": "Lavender"
+        },
+        {
+            "type": "title",
+            "source": "Dark Theme Accent",
+            "target": "Dark Theme Accent"
+        },
+        {
+            "type": "description",
+            "source": "Select your preferred accent",
+            "target": "Select your preferred accent"
+        },
+        {
+            "type": "title",
+            "source": "Force Custom Accents",
+            "target": "Force Custom Accents"
+        },
+        {
+            "type": "description",
+            "source": "Forces colorscheme-specific custom accents to be utilised instead of default obsidian accent",
+            "target": "Forces colorscheme-specific custom accents to be utilised instead of default obsidian accent"
+        },
+        {
+            "type": "title",
+            "source": "Extended Color Schemes Snippet",
+            "target": "Extended Color Schemes Snippet"
+        },
+        {
+            "type": "description",
+            "source": "Download the snippet by clicking on [this link](https://github.com/AnubisNekhet/AnuPpuccin/blob/main/snippets/extended-colorschemes.css).",
+            "target": "Download the snippet by clicking on [this link](https://github.com/AnubisNekhet/AnuPpuccin/blob/main/snippets/extended-colorschemes.css)."
+        },
+        {
+            "type": "markdown",
+            "source": "true",
+            "target": "true"
+        },
+        {
+            "type": "title",
+            "source": "Color Overrides",
+            "target": "Color Overrides"
+        },
+        {
+            "type": "description",
+            "source": "type: heading",
+            "target": "type: heading"
+        },
+        {
+            "type": "title",
+            "source": "Text",
+            "target": "Text"
+        },
+        {
+            "type": "title",
+            "source": "Subtext 1",
+            "target": "Subtext 1"
+        },
+        {
+            "type": "title",
+            "source": "Subtext0",
+            "target": "Subtext0"
+        },
+        {
+            "type": "title",
+            "source": "Overlay 2",
+            "target": "Overlay 2"
+        },
+        {
+            "type": "title",
+            "source": "Overlay 1",
+            "target": "Overlay 1"
+        },
+        {
+            "type": "title",
+            "source": "Overlay 0",
+            "target": "Overlay 0"
+        },
+        {
+            "type": "title",
+            "source": "Surface 2",
+            "target": "Surface 2"
+        },
+        {
+            "type": "title",
+            "source": "Surface 1",
+            "target": "Surface 1"
+        },
+        {
+            "type": "title",
+            "source": "Surface 0",
+            "target": "Surface 0"
+        },
+        {
+            "type": "title",
+            "source": "Base",
+            "target": "Base"
+        },
+        {
+            "type": "title",
+            "source": "Mantle",
+            "target": "Mantle"
+        },
+        {
+            "type": "title",
+            "source": "Crust",
+            "target": "Crust"
+        },
+        {
+            "type": "title",
+            "source": "File Editor & Markdown Elements",
+            "target": "File Editor & Markdown Elements"
+        },
+        {
+            "type": "description",
+            "source": "Callouts, Checkboxes, Codeblocks, Lists, Tables, Tags, etc.",
+            "target": "Callouts, Checkboxes, Codeblocks, Lists, Tables, Tags, etc."
+        },
+        {
+            "type": "title",
+            "source": "Active line highlight",
+            "target": "Active line highlight"
+        },
+        {
+            "type": "label",
+            "source": "None",
+            "target": "None"
+        },
+        {
+            "type": "label",
+            "source": "Highlight",
+            "target": "Highlight"
+        },
+        {
+            "type": "label",
+            "source": "Highlight + Border",
+            "target": "Highlight + Border"
+        },
+        {
+            "type": "label",
+            "source": "Border Only",
+            "target": "Border Only"
+        },
+        {
+            "type": "title",
+            "source": "Callouts",
+            "target": "Callouts"
+        },
+        {
+            "type": "description",
+            "source": "Callout styles, border radius, custom colors",
+            "target": "Callout styles, border radius, custom colors"
+        },
+        {
+            "type": "title",
+            "source": "Callout Style",
+            "target": "Callout Style"
+        },
+        {
+            "type": "label",
+            "source": "Default",
+            "target": "Default"
+        },
+        {
+            "type": "label",
+            "source": "Sleek",
+            "target": "Sleek"
+        },
+        {
+            "type": "label",
+            "source": "Block",
+            "target": "Block"
+        },
+        {
+            "type": "label",
+            "source": "Vanilla Normal",
+            "target": "Vanilla Normal"
+        },
+        {
+            "type": "label",
+            "source": "Vanilla Plus",
+            "target": "Vanilla Plus"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Callout Colors",
+            "target": "Enable Custom Callout Colors"
+        },
+        {
+            "type": "title",
+            "source": "Callout Radius",
+            "target": "Callout Radius"
+        },
+        {
+            "type": "title",
+            "source": "Callout Padding",
+            "target": "Callout Padding"
+        },
+        {
+            "type": "description",
+            "source": "Be careful, it does not properly work with all the callouts style yet.",
+            "target": "Be careful, it does not properly work with all the callouts style yet."
+        },
+        {
+            "type": "title",
+            "source": "Callout Title Padding",
+            "target": "Callout Title Padding"
+        },
+        {
+            "type": "title",
+            "source": "Callout Title Background Opacity",
+            "target": "Callout Title Background Opacity"
+        },
+        {
+            "type": "description",
+            "source": "Applies to Sleek, Vanilla and Vanilla Plus callouts",
+            "target": "Applies to Sleek, Vanilla and Vanilla Plus callouts"
+        },
+        {
+            "type": "title",
+            "source": "Callout Content Padding",
+            "target": "Callout Content Padding"
+        },
+        {
+            "type": "title",
+            "source": "Callout Fold Position",
+            "target": "Callout Fold Position"
+        },
+        {
+            "type": "label",
+            "source": "Left",
+            "target": "Left"
+        },
+        {
+            "type": "label",
+            "source": "Right",
+            "target": "Right"
+        },
+        {
+            "type": "title",
+            "source": "Checkboxes",
+            "target": "Checkboxes"
+        },
+        {
+            "type": "description",
+            "source": "Custom checkboxes and speech bubbles",
+            "target": "Custom checkboxes and speech bubbles"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Checkboxes",
+            "target": "Enable Custom Checkboxes"
+        },
+        {
+            "type": "title",
+            "source": "Enable Speech Bubbles",
+            "target": "Enable Speech Bubbles"
+        },
+        {
+            "type": "title",
+            "source": "Codeblocks",
+            "target": "Codeblocks"
+        },
+        {
+            "type": "description",
+            "source": "Codeblock wrapping, line numbering",
+            "target": "Codeblock wrapping, line numbering"
+        },
+        {
+            "type": "title",
+            "source": "Enable Codeblock Numbering",
+            "target": "Enable Codeblock Numbering"
+        },
+        {
+            "type": "title",
+            "source": "Codeblock Line Wrap (Edit Mode)",
+            "target": "Codeblock Line Wrap (Edit Mode)"
+        },
+        {
+            "type": "description",
+            "source": "Does not work for codeblocks with syntax highlighting",
+            "target": "Does not work for codeblocks with syntax highlighting"
+        },
+        {
+            "type": "label",
+            "source": "Wrap",
+            "target": "Wrap"
+        },
+        {
+            "type": "label",
+            "source": "No Wrap",
+            "target": "No Wrap"
+        },
+        {
+            "type": "title",
+            "source": "Codeblock Line Wrap (Preview Mode)",
+            "target": "Codeblock Line Wrap (Preview Mode)"
+        },
+        {
+            "type": "title",
+            "source": "Syntax Highlighted Codeblock Line Wrap (Preview Mode)",
+            "target": "Syntax Highlighted Codeblock Line Wrap (Preview Mode)"
+        },
+        {
+            "type": "title",
+            "source": "Codeblock Background Color",
+            "target": "Codeblock Background Color"
+        },
+        {
+            "type": "title",
+            "source": "Codeblock Text Color",
+            "target": "Codeblock Text Color"
+        },
+        {
+            "type": "description",
+            "source": "Applies to codeblocks without syntax highlighting",
+            "target": "Applies to codeblocks without syntax highlighting"
+        },
+        {
+            "type": "title",
+            "source": "Embeds",
+            "target": "Embeds"
+        },
+        {
+            "type": "description",
+            "source": "Images, videos, iframes, etc.",
+            "target": "Images, videos, iframes, etc."
+        },
+        {
+            "type": "title",
+            "source": "Embed Corner Radius",
+            "target": "Embed Corner Radius"
+        },
+        {
+            "type": "title",
+            "source": "LaTex",
+            "target": "LaTex"
+        },
+        {
+            "type": "description",
+            "source": "LaTeX (Math) color, font size",
+            "target": "LaTeX (Math) color, font size"
+        },
+        {
+            "type": "title",
+            "source": "LaTeX Inline Color",
+            "target": "LaTeX Inline Color"
+        },
+        {
+            "type": "label",
+            "source": "Subtext 0",
+            "target": "Subtext 0"
+        },
+        {
+            "type": "title",
+            "source": "LaTeX Block Color",
+            "target": "LaTeX Block Color"
+        },
+        {
+            "type": "title",
+            "source": "LaTeX Block Font Size",
+            "target": "LaTeX 块字体大小"
+        },
+        {
+            "type": "description",
+            "source": "Change the font size of LaTeX blocks.",
+            "target": "更改 LaTeX 块的字体大小。"
+        },
+        {
+            "type": "title",
+            "source": "Lists",
+            "target": "列表"
+        },
+        {
+            "type": "description",
+            "source": "Styling, indent, spacing",
+            "target": "样式、缩进、间距"
+        },
+        {
+            "type": "title",
+            "source": "Enable List Styling",
+            "target": "启用列表样式"
+        },
+        {
+            "type": "title",
+            "source": "List Indent",
+            "target": "列表缩进"
+        },
+        {
+            "type": "title",
+            "source": "List Spacing",
+            "target": "列表间距"
+        },
+        {
+            "type": "title",
+            "source": "Unordered list bullet color",
+            "target": "无序列表符号颜色"
+        },
+        {
+            "type": "title",
+            "source": "Ordered list style",
+            "target": "有序列表样式"
+        },
+        {
+            "type": "label",
+            "source": "Decimal",
+            "target": "数字"
+        },
+        {
+            "type": "label",
+            "source": "Decimal with leading zeroes",
+            "target": "Decimal with leading zeroes"
+        },
+        {
+            "type": "label",
+            "source": "Lowercase alphabetical",
+            "target": "Lowercase alphabetical"
+        },
+        {
+            "type": "label",
+            "source": "Uppercase alphabetical",
+            "target": "Uppercase alphabetical"
+        },
+        {
+            "type": "label",
+            "source": "Lowercase Roman Numerals",
+            "target": "Lowercase Roman Numerals"
+        },
+        {
+            "type": "label",
+            "source": "Uppercase Roman Numerals",
+            "target": "Uppercase Roman Numerals"
+        },
+        {
+            "type": "label",
+            "source": "Lowercase Latin",
+            "target": "Lowercase Latin"
+        },
+        {
+            "type": "label",
+            "source": "Uppercase Latin",
+            "target": "Uppercase Latin"
+        },
+        {
+            "type": "label",
+            "source": "Lowercase Greek",
+            "target": "Lowercase Greek"
+        },
+        {
+            "type": "label",
+            "source": "Uppercase Greek",
+            "target": "Uppercase Greek"
+        },
+        {
+            "type": "label",
+            "source": "Hiragana",
+            "target": "Hiragana"
+        },
+        {
+            "type": "label",
+            "source": "Hiragana Iroha",
+            "target": "Hiragana Iroha"
+        },
+        {
+            "type": "label",
+            "source": "Katakana",
+            "target": "Katakana"
+        },
+        {
+            "type": "label",
+            "source": "Katakana Iroha",
+            "target": "Katakana Iroha"
+        },
+        {
+            "type": "label",
+            "source": "Armenian",
+            "target": "Armenian"
+        },
+        {
+            "type": "label",
+            "source": "CJK Ideographic",
+            "target": "CJK Ideographic"
+        },
+        {
+            "type": "label",
+            "source": "Hebrew",
+            "target": "Hebrew"
+        },
+        {
+            "type": "title",
+            "source": "Tables",
+            "target": "Tables"
+        },
+        {
+            "type": "description",
+            "source": "Table width, alignment, table element highlight and alignment, border width",
+            "target": "Table width, alignment, table element highlight and alignment, border width"
+        },
+        {
+            "type": "title",
+            "source": "Enable Table Styling",
+            "target": "Enable Table Styling"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Table Width",
+            "target": "Enable Custom Table Width"
+        },
+        {
+            "type": "description",
+            "source": "Use anp-table-width for yaml syntax",
+            "target": "Use anp-table-width for yaml syntax"
+        },
+        {
+            "type": "title",
+            "source": "Center Tables",
+            "target": "Center Tables"
+        },
+        {
+            "type": "description",
+            "source": "Use anp-table-auto for yaml syntax",
+            "target": "Use anp-table-auto for yaml syntax"
+        },
+        {
+            "type": "title",
+            "source": "<th> Highlight",
+            "target": "<th> Highlight"
+        },
+        {
+            "type": "title",
+            "source": "<td> Highlight",
+            "target": "<td> Highlight"
+        },
+        {
+            "type": "label",
+            "source": "Alternate Rows",
+            "target": "Alternate Rows"
+        },
+        {
+            "type": "label",
+            "source": "Alternate Columns",
+            "target": "Alternate Columns"
+        },
+        {
+            "type": "label",
+            "source": "Checkered",
+            "target": "Checkered"
+        },
+        {
+            "type": "label",
+            "source": "Full",
+            "target": "Full"
+        },
+        {
+            "type": "title",
+            "source": "Highlight Opacity",
+            "target": "Highlight Opacity"
+        },
+        {
+            "type": "title",
+            "source": "<th> Text Align",
+            "target": "<th> Text Align"
+        },
+        {
+            "type": "label",
+            "source": "Center",
+            "target": "Center"
+        },
+        {
+            "type": "title",
+            "source": "<td> Text Align",
+            "target": "<td> Text Align"
+        },
+        {
+            "type": "title",
+            "source": "Custom Table Border Width",
+            "target": "Custom Table Border Width"
+        },
+        {
+            "type": "title",
+            "source": "Custom Table Width",
+            "target": "Custom Table Width"
+        },
+        {
+            "type": "title",
+            "source": "Tags",
+            "target": "Tags"
+        },
+        {
+            "type": "description",
+            "source": "Border Width and Border Radius of Tags",
+            "target": "Border Width and Border Radius of Tags"
+        },
+        {
+            "type": "title",
+            "source": "Tag Border Width",
+            "target": "Tag Border Width"
+        },
+        {
+            "type": "title",
+            "source": "Tag Radius",
+            "target": "Tag Radius"
+        },
+        {
+            "type": "title",
+            "source": "File Preview",
+            "target": "File Preview"
+        },
+        {
+            "type": "description",
+            "source": "File Preview Margins and Word-Wrap Width",
+            "target": "File Preview Margins and Word-Wrap Width"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Preview Margins",
+            "target": "Enable Custom Preview Margins"
+        },
+        {
+            "type": "title",
+            "source": "File Margins",
+            "target": "File Margins"
+        },
+        {
+            "type": "title",
+            "source": "Preview Width",
+            "target": "Preview Width"
+        },
+        {
+            "type": "title",
+            "source": "Maximum Preview Width",
+            "target": "Maximum Preview Width"
+        },
+        {
+            "type": "title",
+            "source": "Integrations",
+            "target": "Integrations"
+        },
+        {
+            "type": "description",
+            "source": "Kanban, MAKE.md, Minimal Cards Snippet, etc.",
+            "target": "Kanban, MAKE.md, Minimal Cards Snippet, etc."
+        },
+        {
+            "type": "title",
+            "source": "Kanban",
+            "target": "Kanban"
+        },
+        {
+            "type": "title",
+            "source": "Card Settings",
+            "target": "Card Settings"
+        },
+        {
+            "type": "title",
+            "source": "Hide the Card Menu Button",
+            "target": "Hide the Card Menu Button"
+        },
+        {
+            "type": "title",
+            "source": "Hide the Archive Card Button",
+            "target": "Hide the Archive Card Button"
+        },
+        {
+            "type": "title",
+            "source": "Disable Card Borders",
+            "target": "Disable Card Borders"
+        },
+        {
+            "type": "title",
+            "source": "Card Opacity",
+            "target": "Card Opacity"
+        },
+        {
+            "type": "title",
+            "source": "Card Radius",
+            "target": "Card Radius"
+        },
+        {
+            "type": "title",
+            "source": "Card Spacing",
+            "target": "Card Spacing"
+        },
+        {
+            "type": "title",
+            "source": "Lane Settings",
+            "target": "Lane Settings"
+        },
+        {
+            "type": "title",
+            "source": "Enable Full Height Lanes",
+            "target": "Enable Full Height Lanes"
+        },
+        {
+            "type": "description",
+            "source": "Toggles maximum height for Kanban lanes",
+            "target": "Toggles maximum height for Kanban lanes"
+        },
+        {
+            "type": "title",
+            "source": "Disable Lane Borders",
+            "target": "Disable Lane Borders"
+        },
+        {
+            "type": "title",
+            "source": "Lane Opacity",
+            "target": "Lane Opacity"
+        },
+        {
+            "type": "title",
+            "source": "Lane Radius",
+            "target": "Lane Radius"
+        },
+        {
+            "type": "title",
+            "source": "Lane Spacing",
+            "target": "Lane Spacing"
+        },
+        {
+            "type": "title",
+            "source": "Search Settings",
+            "target": "Search Settings"
+        },
+        {
+            "type": "title",
+            "source": "Enable Full Width Search Bar",
+            "target": "Enable Full Width Search Bar"
+        },
+        {
+            "type": "description",
+            "source": "type: class-toggle",
+            "target": "type: class-toggle"
+        },
+        {
+            "type": "title",
+            "source": "Collapse Lanes With No Search Results",
+            "target": "Collapse Lanes With No Search Results"
+        },
+        {
+            "type": "title",
+            "source": "Hide Cards That Don't Contain the Search Query",
+            "target": "Hide Cards That Don't Contain the Search Query"
+        },
+        {
+            "type": "title",
+            "source": "Hide Search Result Highlight in Cards",
+            "target": "Hide Search Result Highlight in Cards"
+        },
+        {
+            "type": "title",
+            "source": "Uncollapse Lanes and Unhide Cards When Sorting",
+            "target": "Uncollapse Lanes and Unhide Cards When Sorting"
+        },
+        {
+            "type": "title",
+            "source": "MAKE.md",
+            "target": "MAKE.md"
+        },
+        {
+            "type": "title",
+            "source": "Inline Title Visibility",
+            "target": "Inline Title Visibility"
+        },
+        {
+            "type": "description",
+            "source": "Make.md requires inline titles to be enabled to show folder titles, hence this toggle exists to disable it on notes elsewhere.",
+            "target": "Make.md requires inline titles to be enabled to show folder titles, hence this toggle exists to disable it on notes elsewhere."
+        },
+        {
+            "type": "label",
+            "source": "Visible",
+            "target": "Visible"
+        },
+        {
+            "type": "label",
+            "source": "Invisible",
+            "target": "Invisible"
+        },
+        {
+            "type": "title",
+            "source": "Minimal Cards",
+            "target": "Minimal Cards"
+        },
+        {
+            "type": "title",
+            "source": "Usage",
+            "target": "Usage"
+        },
+        {
+            "type": "description",
+            "source": "Minimal Cards is a feature of [Minimal](https://github.com/kepano/obsidian-minimal). AnuPpuccin does not come compiled with the snippet, however you can use a compiled version with this theme.",
+            "target": "Minimal Cards is a feature of [Minimal](https://github.com/kepano/obsidian-minimal). AnuPpuccin does not come compiled with the snippet, however you can use a compiled version with this theme."
+        },
+        {
+            "type": "title",
+            "source": "Minimal Cards Snippet",
+            "target": "Minimal Cards Snippet"
+        },
+        {
+            "type": "description",
+            "source": "Download the snippet from [kepano](https://github.com/kepano/)'s github via [this link](https://github.com/kepano/obsidian-minimal/blob/master/src/scss/features/cards.scss).",
+            "target": "Download the snippet from [kepano](https://github.com/kepano/)'s github via [this link](https://github.com/kepano/obsidian-minimal/blob/master/src/scss/features/cards.scss)."
+        },
+        {
+            "type": "title",
+            "source": "Card minimum width",
+            "target": "Card minimum width"
+        },
+        {
+            "type": "title",
+            "source": "Card maximum width",
+            "target": "Card maximum width"
+        },
+        {
+            "type": "description",
+            "source": "Default fills the available width, accepts valid CSS units",
+            "target": "Default fills the available width, accepts valid CSS units"
+        },
+        {
+            "type": "title",
+            "source": "Card minimum width on mobile",
+            "target": "Card minimum width on mobile"
+        },
+        {
+            "type": "title",
+            "source": "Card padding",
+            "target": "Card padding"
+        },
+        {
+            "type": "title",
+            "source": "Card maximum image height",
+            "target": "Card maximum image height"
+        },
+        {
+            "type": "title",
+            "source": "Card border width",
+            "target": "Card border width"
+        },
+        {
+            "type": "title",
+            "source": "Miscellaneous",
+            "target": "Miscellaneous"
+        },
+        {
+            "type": "description",
+            "source": "Color Palette Transition, Custom Metadata Button",
+            "target": "Color Palette Transition, Custom Metadata Button"
+        },
+        {
+            "type": "title",
+            "source": "Enable Color Transition (WIP)",
+            "target": "Enable Color Transition (WIP)"
+        },
+        {
+            "type": "description",
+            "source": "Adds a transition when switching palettes, looks really neat :)",
+            "target": "Adds a transition when switching palettes, looks really neat :)"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Metadata Button",
+            "target": "Enable Custom Metadata Button"
+        },
+        {
+            "type": "title",
+            "source": "Enable Print Styling",
+            "target": "Enable Print Styling"
+        },
+        {
+            "type": "title",
+            "source": "Show/Hide UI Elements",
+            "target": "Show/Hide UI Elements"
+        },
+        {
+            "type": "description",
+            "source": "Toggle Visibility of UI Elements",
+            "target": "Toggle Visibility of UI Elements"
+        },
+        {
+            "type": "title",
+            "source": "Autohide Title Bar",
+            "target": "Autohide Title Bar"
+        },
+        {
+            "type": "title",
+            "source": "Pointer cursor",
+            "target": "Pointer cursor"
+        },
+        {
+            "type": "label",
+            "source": "Pointer",
+            "target": "Pointer"
+        },
+        {
+            "type": "label",
+            "source": "Normal",
+            "target": "Normal"
+        },
+        {
+            "type": "title",
+            "source": "Hide Metadata",
+            "target": "Hide Metadata"
+        },
+        {
+            "type": "title",
+            "source": "Hide Scrollbars",
+            "target": "Hide Scrollbars"
+        },
+        {
+            "type": "title",
+            "source": "Hide Status Bar",
+            "target": "Hide Status Bar"
+        },
+        {
+            "type": "title",
+            "source": "Hide Tooltips",
+            "target": "Hide Tooltips"
+        },
+        {
+            "type": "title",
+            "source": "Hide External Link Icon",
+            "target": "Hide External Link Icon"
+        },
+        {
+            "type": "title",
+            "source": "Typography",
+            "target": "Typography"
+        },
+        {
+            "type": "description",
+            "source": "Fonts, Headings, Text Decoration, etc.",
+            "target": "Fonts, Headings, Text Decoration, etc."
+        },
+        {
+            "type": "title",
+            "source": "Font Families",
+            "target": "Font Families"
+        },
+        {
+            "type": "title",
+            "source": "Source Editor Font",
+            "target": "Source Editor Font"
+        },
+        {
+            "type": "title",
+            "source": "Live Preview Editor Font",
+            "target": "Live Preview Editor Font"
+        },
+        {
+            "type": "title",
+            "source": "Reading View Editor Font",
+            "target": "Reading View Editor Font"
+        },
+        {
+            "type": "title",
+            "source": "Font Weights",
+            "target": "Font Weights"
+        },
+        {
+            "type": "title",
+            "source": "Bold Weight",
+            "target": "Bold Weight"
+        },
+        {
+            "type": "label",
+            "source": "Bolder (Relative)",
+            "target": "Bolder (Relative)"
+        },
+        {
+            "type": "label",
+            "source": "Lightest",
+            "target": "Lightest"
+        },
+        {
+            "type": "label",
+            "source": "Lighter",
+            "target": "Lighter"
+        },
+        {
+            "type": "label",
+            "source": "Light",
+            "target": "Light"
+        },
+        {
+            "type": "label",
+            "source": "Bold",
+            "target": "Bold"
+        },
+        {
+            "type": "label",
+            "source": "Bolder",
+            "target": "Bolder"
+        },
+        {
+            "type": "label",
+            "source": "Extrabold",
+            "target": "Extrabold"
+        },
+        {
+            "type": "label",
+            "source": "Extra-extrabold",
+            "target": "Extra-extrabold"
+        },
+        {
+            "type": "label",
+            "source": "Black",
+            "target": "Black"
+        },
+        {
+            "type": "title",
+            "source": "Live Preview Mode Weight",
+            "target": "Live Preview Mode Weight"
+        },
+        {
+            "type": "title",
+            "source": "Reading Mode Weight",
+            "target": "Reading Mode Weight"
+        },
+        {
+            "type": "title",
+            "source": "Source Mode Weight",
+            "target": "Source Mode Weight"
+        },
+        {
+            "type": "title",
+            "source": "Headings",
+            "target": "Headings"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Heading Colors",
+            "target": "Enable Custom Heading Colors"
+        },
+        {
+            "type": "title",
+            "source": "Enable Custom Heading Margin",
+            "target": "Enable Custom Heading Margin"
+        },
+        {
+            "type": "title",
+            "source": "Inherit Divider Color from Heading Color",
+            "target": "Inherit Divider Color from Heading Color"
+        },
+        {
+            "type": "title",
+            "source": "Heading margin value",
+            "target": "Heading margin value"
+        },
+        {
+            "type": "description",
+            "source": "Size unit is px",
+            "target": "Size unit is px"
+        },
+        {
+            "type": "title",
+            "source": "H1",
+            "target": "H1"
+        },
+        {
+            "type": "title",
+            "source": "H1 Font Family",
+            "target": "H1 Font Family"
+        },
+        {
+            "type": "title",
+            "source": "H1 Font Size",
+            "target": "H1 Font Size"
+        },
+        {
+            "type": "title",
+            "source": "H1 Font Weight",
+            "target": "H1 Font Weight"
+        },
+        {
+            "type": "title",
+            "source": "H1 Line Height",
+            "target": "H1 Line Height"
+        },
+        {
+            "type": "title",
+            "source": "H1 Color",
+            "target": "H1 Color"
+        },
+        {
+            "type": "title",
+            "source": "H1 Divider",
+            "target": "H1 Divider"
+        },
+        {
+            "type": "title",
+            "source": "H2",
+            "target": "H2"
+        },
+        {
+            "type": "title",
+            "source": "H2 Font Family",
+            "target": "H2 Font Family"
+        },
+        {
+            "type": "title",
+            "source": "H2 Font Size",
+            "target": "H2 Font Size"
+        },
+        {
+            "type": "title",
+            "source": "H2 Font Weight",
+            "target": "H2 Font Weight"
+        },
+        {
+            "type": "title",
+            "source": "H2 Line Height",
+            "target": "H2 Line Height"
+        },
+        {
+            "type": "title",
+            "source": "H2 Color",
+            "target": "H2 Color"
+        },
+        {
+            "type": "title",
+            "source": "H2 Divider",
+            "target": "H2 Divider"
+        },
+        {
+            "type": "title",
+            "source": "H3",
+            "target": "H3"
+        },
+        {
+            "type": "title",
+            "source": "H3 Font Family",
+            "target": "H3 Font Family"
+        },
+        {
+            "type": "title",
+            "source": "H3 Font Size",
+            "target": "H3 Font Size"
+        },
+        {
+            "type": "title",
+            "source": "H3 Font Weight",
+            "target": "H3 Font Weight"
+        },
+        {
+            "type": "title",
+            "source": "H3 Line Height",
+            "target": "H3 Line Height"
+        },
+        {
+            "type": "title",
+            "source": "H3 Color",
+            "target": "H3 Color"
+        },
+        {
+            "type": "title",
+            "source": "H3 Divider",
+            "target": "H3 Divider"
+        },
+        {
+            "type": "title",
+            "source": "H4",
+            "target": "H4"
+        },
+        {
+            "type": "title",
+            "source": "H4 Font Family",
+            "target": "H4 Font Family"
+        },
+        {
+            "type": "title",
+            "source": "H4 Font Size",
+            "target": "H4 Font Size"
+        },
+        {
+            "type": "title",
+            "source": "H4 Font Weight",
+            "target": "H4 Font Weight"
+        },
+        {
+            "type": "title",
+            "source": "H4 Line Height",
+            "target": "H4 Line Height"
+        },
+        {
+            "type": "title",
+            "source": "H4 Color",
+            "target": "H4 Color"
+        },
+        {
+            "type": "title",
+            "source": "H4 Divider",
+            "target": "H4 Divider"
+        },
+        {
+            "type": "title",
+            "source": "H5",
+            "target": "H5"
+        },
+        {
+            "type": "title",
+            "source": "H5 Font Family",
+            "target": "H5 Font Family"
+        },
+        {
+            "type": "title",
+            "source": "H5 Font Size",
+            "target": "H5 Font Size"
+        },
+        {
+            "type": "title",
+            "source": "H5 Font Weight",
+            "target": "H5 Font Weight"
+        },
+        {
+            "type": "title",
+            "source": "H5 Line Height",
+            "target": "H5 Line Height"
+        },
+        {
+            "type": "title",
+            "source": "H5 Color",
+            "target": "H5 Color"
+        },
+        {
+            "type": "title",
+            "source": "H5 Divider",
+            "target": "H5 Divider"
+        },
+        {
+            "type": "title",
+            "source": "H6",
+            "target": "H6"
+        },
+        {
+            "type": "title",
+            "source": "H6 Font Family",
+            "target": "H6 Font Family"
+        },
+        {
+            "type": "title",
+            "source": "H6 Font Size",
+            "target": "H6 Font Size"
+        },
+        {
+            "type": "title",
+            "source": "H6 Font Weight",
+            "target": "H6 Font Weight"
+        },
+        {
+            "type": "title",
+            "source": "H6 Line Height",
+            "target": "H6 Line Height"
+        },
+        {
+            "type": "title",
+            "source": "H6 Color",
+            "target": "H6 Color"
+        },
+        {
+            "type": "title",
+            "source": "H6 Divider",
+            "target": "H6 Divider"
+        },
+        {
+            "type": "title",
+            "source": "Comments",
+            "target": "Comments"
+        },
+        {
+            "type": "title",
+            "source": "Hide Comments",
+            "target": "Hide Comments"
+        },
+        {
+            "type": "description",
+            "source": "Hides the comments while not editing them.",
+            "target": "Hides the comments while not editing them."
+        },
+        {
+            "type": "title",
+            "source": "Hide Comment Indicators",
+            "target": "Hide Comment Indicators"
+        },
+        {
+            "type": "description",
+            "source": "Hides the '%%' while not editing comments.",
+            "target": "Hides the '%%' while not editing comments."
+        },
+        {
+            "type": "title",
+            "source": "Text Decoration",
+            "target": "Text Decoration"
+        },
+        {
+            "type": "title",
+            "source": "Enable Decoration Colors",
+            "target": "Enable Decoration Colors"
+        },
+        {
+            "type": "title",
+            "source": "Bold Color",
+            "target": "Bold Color"
+        },
+        {
+            "type": "title",
+            "source": "Italic Color",
+            "target": "Italic Color"
+        },
+        {
+            "type": "title",
+            "source": "Highlight Color",
+            "target": "Highlight Color"
+        },
+        {
+            "type": "title",
+            "source": "Workspace",
+            "target": "Workspace"
+        },
+        {
+            "type": "description",
+            "source": "Background, Colorful Frame, Layout, Sidebar, Tabs, Translucency, etc.",
+            "target": "Background, Colorful Frame, Layout, Sidebar, Tabs, Translucency, etc."
+        },
+        {
+            "type": "title",
+            "source": "Canvas",
+            "target": "Canvas"
+        },
+        {
+            "type": "description",
+            "source": "Darken Canvas Background",
+            "target": "Darken Canvas Background"
+        },
+        {
+            "type": "title",
+            "source": "Darker Canvas Background",
+            "target": "Darker Canvas Background"
+        },
+        {
+            "type": "title",
+            "source": "Colorful Frame",
+            "target": "Colorful Frame"
+        },
+        {
+            "type": "title",
+            "source": "Enable Colorful Frame (WIP)",
+            "target": "Enable Colorful Frame (WIP)"
+        },
+        {
+            "type": "title",
+            "source": "Invert Icon Colors - Light",
+            "target": "Invert Icon Colors - Light"
+        },
+        {
+            "type": "title",
+            "source": "Invert Icon Colors - Dark",
+            "target": "Invert Icon Colors - Dark"
+        },
+        {
+            "type": "title",
+            "source": "Colorful Frame Opacity",
+            "target": "Colorful Frame Opacity"
+        },
+        {
+            "type": "title",
+            "source": "Custom Colorful Frame Color",
+            "target": "Custom Colorful Frame Color"
+        },
+        {
+            "type": "title",
+            "source": "File Browser",
+            "target": "File Browser"
+        },
+        {
+            "type": "description",
+            "source": "Enable/Disable File Browser elements",
+            "target": "Enable/Disable File Browser elements"
+        },
+        {
+            "type": "title",
+            "source": "Enable custom vault title",
+            "target": "Enable custom vault title"
+        },
+        {
+            "type": "title",
+            "source": "Enable file icons",
+            "target": "Enable file icons"
+        },
+        {
+            "type": "title",
+            "source": "Enable floating vault title",
+            "target": "Enable floating vault title"
+        },
+        {
+            "type": "title",
+            "source": "Enable folder icons for collapse indicators",
+            "target": "Enable folder icons for collapse indicators"
+        },
+        {
+            "type": "title",
+            "source": "File label alignment",
+            "target": "File label alignment"
+        },
+        {
+            "type": "title",
+            "source": "PDF Viewer",
+            "target": "PDF Viewer"
+        },
+        {
+            "type": "title",
+            "source": "Toggle PDF background blending - Dark Mode",
+            "target": "Toggle PDF background blending - Dark Mode"
+        },
+        {
+            "type": "title",
+            "source": "Toggle PDF background blending - Light Mode",
+            "target": "Toggle PDF background blending - Light Mode"
+        },
+        {
+            "type": "title",
+            "source": "Rainbow Folders",
+            "target": "Rainbow Folders"
+        },
+        {
+            "type": "title",
+            "source": "Custom rainbow folder colors snippet",
+            "target": "Custom rainbow folder colors snippet"
+        },
+        {
+            "type": "description",
+            "source": "Download the snippet through [this link](https://github.com/AnubisNekhet/AnuPpuccin/blob/main/snippets/custom-rainbow-colors.css).",
+            "target": "Download the snippet through [this link](https://github.com/AnubisNekhet/AnuPpuccin/blob/main/snippets/custom-rainbow-colors.css)."
+        },
+        {
+            "type": "title",
+            "source": "Rainbow style",
+            "target": "Rainbow style"
+        },
+        {
+            "type": "label",
+            "source": "Simple",
+            "target": "Simple"
+        },
+        {
+            "type": "title",
+            "source": "Full Folder Settings",
+            "target": "Full Folder Settings"
+        },
+        {
+            "type": "title",
+            "source": "File recolor toggle",
+            "target": "File recolor toggle"
+        },
+        {
+            "type": "title",
+            "source": "Invert title colors (Light Mode)",
+            "target": "Invert title colors (Light Mode)"
+        },
+        {
+            "type": "title",
+            "source": "Invert title colors (Dark Mode)",
+            "target": "Invert title colors (Dark Mode)"
+        },
+        {
+            "type": "title",
+            "source": "Folder background color opacity",
+            "target": "Folder background color opacity"
+        },
+        {
+            "type": "title",
+            "source": "Simple Folder Settings",
+            "target": "Simple Folder Settings"
+        },
+        {
+            "type": "title",
+            "source": "Enable title recolor",
+            "target": "Enable title recolor"
+        },
+        {
+            "type": "title",
+            "source": "Enable collapse icon recolor",
+            "target": "Enable collapse icon recolor"
+        },
+        {
+            "type": "title",
+            "source": "Enable collapse indent recolor",
+            "target": "Enable collapse indent recolor"
+        },
+        {
+            "type": "title",
+            "source": "Enable circular file",
+            "target": "Enable circular file"
+        },
+        {
+            "type": "title",
+            "source": "Enable subfolder color inheritance",
+            "target": "Enable subfolder color inheritance"
+        },
+        {
+            "type": "title",
+            "source": "Stacked Tabs",
+            "target": "Stacked Tabs"
+        },
+        {
+            "type": "title",
+            "source": "Stacked tabs header width",
+            "target": "Stacked tabs header width"
+        },
+        {
+            "type": "title",
+            "source": "Stacked tabs pane width multiplier",
+            "target": "Stacked tabs pane width multiplier"
+        },
+        {
+            "type": "description",
+            "source": "Multiplies the stack tab pane with which depends on file line width",
+            "target": "Multiplies the stack tab pane with which depends on file line width"
+        },
+        {
+            "type": "title",
+            "source": "Status Bar",
+            "target": "Status Bar"
+        },
+        {
+            "type": "description",
+            "source": "Select status bar style",
+            "target": "Select status bar style"
+        },
+        {
+            "type": "title",
+            "source": "Status Bar Style",
+            "target": "Status Bar Style"
+        },
+        {
+            "type": "label",
+            "source": "Floating",
+            "target": "Floating"
+        },
+        {
+            "type": "label",
+            "source": "Fixed",
+            "target": "Fixed"
+        },
+        {
+            "type": "title",
+            "source": "Tabs",
+            "target": "Tabs"
+        },
+        {
+            "type": "title",
+            "source": "Tab style",
+            "target": "Tab style"
+        },
+        {
+            "type": "label",
+            "source": "Depth",
+            "target": "Depth"
+        },
+        {
+            "type": "label",
+            "source": "Minimalistic",
+            "target": "Minimalistic"
+        },
+        {
+            "type": "label",
+            "source": "Safari-style (Animated)",
+            "target": "Safari-style (Animated)"
+        },
+        {
+            "type": "label",
+            "source": "Safari-style (Vanilla)",
+            "target": "Safari-style (Vanilla)"
+        },
+        {
+            "type": "title",
+            "source": "Custom tab height",
+            "target": "Custom tab height"
+        },
+        {
+            "type": "title",
+            "source": "Disable new tab button right alignment",
+            "target": "Disable new tab button right alignment"
+        },
+        {
+            "type": "title",
+            "source": "Depth Tab Settings",
+            "target": "Depth Tab Settings"
+        },
+        {
+            "type": "description",
+            "source": "Only applies to inactive tabs",
+            "target": "Only applies to inactive tabs"
+        },
+        {
+            "type": "title",
+            "source": "Invert tab text color",
+            "target": "Invert tab text color"
+        },
+        {
+            "type": "title",
+            "source": "Tab opacity",
+            "target": "Tab opacity"
+        },
+        {
+            "type": "title",
+            "source": "Tab gap",
+            "target": "Tab gap"
+        },
+        {
+            "type": "title",
+            "source": "Animated Safari-style Tab Settings",
+            "target": "Animated Safari-style Tab Settings"
+        },
+        {
+            "type": "description",
+            "source": "Adapted from github.com/chuckharmston's snippets",
+            "target": "Adapted from github.com/chuckharmston's snippets"
+        },
+        {
+            "type": "title",
+            "source": "Tab radius",
+            "target": "Tab radius"
+        },
+        {
+            "type": "title",
+            "source": "Tab border width",
+            "target": "Tab border width"
+        },
+        {
+            "type": "title",
+            "source": "Vanilla Safari-style Tab Settings",
+            "target": "Vanilla Safari-style Tab Settings"
+        },
+        {
+            "type": "title",
+            "source": "Enable WIP animated safari tabs",
+            "target": "Enable WIP animated safari tabs"
+        },
+        {
+            "type": "title",
+            "source": "Translucency",
+            "target": "Translucency"
+        },
+        {
+            "type": "description",
+            "source": "Drag to change background opacity",
+            "target": "Drag to change background opacity"
+        },
+        {
+            "type": "title",
+            "source": "Window opacity",
+            "target": "Window opacity"
+        },
+        {
+            "type": "title",
+            "source": "Workspace Layout",
+            "target": "Workspace Layout"
+        },
+        {
+            "type": "description",
+            "source": "Workspace layout and arrangement",
+            "target": "Workspace layout and arrangement"
+        },
+        {
+            "type": "title",
+            "source": "Workspace Layout variant",
+            "target": "Workspace Layout variant"
+        },
+        {
+            "type": "label",
+            "source": "Border",
+            "target": "Border"
+        },
+        {
+            "type": "label",
+            "source": "Cards",
+            "target": "Cards"
+        },
+        {
+            "type": "title",
+            "source": "Background fix for applying colors",
+            "target": "Background fix for applying colors"
+        },
+        {
+            "type": "title",
+            "source": "Hide borders",
+            "target": "Hide borders"
+        },
+        {
+            "type": "title",
+            "source": "Card Layout Settings",
+            "target": "Card Layout Settings"
+        },
+        {
+            "type": "title",
+            "source": "Card radius",
+            "target": "Card radius"
+        },
+        {
+            "type": "title",
+            "source": "Tab left padding",
+            "target": "Tab left padding"
+        },
+        {
+            "type": "title",
+            "source": "Enable shadows",
+            "target": "Enable shadows"
+        },
+        {
+            "type": "title",
+            "source": "Enable card format for actions",
+            "target": "Enable card format for actions"
+        },
+        {
+            "type": "title",
+            "source": "Enable card format for file browser",
+            "target": "Enable card format for file browser"
+        },
+        {
+            "type": "title",
+            "source": "Border Layout Settings",
+            "target": "Border Layout Settings"
+        },
+        {
+            "type": "title",
+            "source": "Border Layout Radius",
+            "target": "Border Layout Radius"
+        },
+        {
+            "type": "title",
+            "source": "Border Layout Padding",
+            "target": "Border Layout Padding"
+        },
+        {
+            "type": "title",
+            "source": "Support AnuPpuccin",
+            "target": "Support AnuPpuccin"
+        },
+        {
+            "type": "description",
+            "source": "If you like the theme, here are some ways to support development",
+            "target": "If you like the theme, here are some ways to support development"
+        },
+        {
+            "type": "title",
+            "source": "Buy Me a Coffee",
+            "target": "Buy Me a Coffee"
+        },
+        {
+            "type": "description",
+            "source": "[https://www.buymeacoffee.com/anubisnekhet](https://www.buymeacoffee.com/anubisnekhet)",
+            "target": "[https://www.buymeacoffee.com/anubisnekhet](https://www.buymeacoffee.com/anubisnekhet)"
+        },
+        {
+            "type": "title",
+            "source": "Star the Theme on GitHub",
+            "target": "Star the Theme on GitHub"
+        },
+        {
+            "type": "description",
+            "source": "[https://github.com/anubisnekhet/anuppuccin](https://github.com/anubisnekhet/anuppuccin)",
+            "target": "[https://github.com/anubisnekhet/anuppuccin](https://github.com/anubisnekhet/anuppuccin)"
+        },
+        {
+            "type": "title",
+            "source": "Submit an Issue on GitHub",
+            "target": "Submit an Issue on GitHub"
+        },
+        {
+            "type": "description",
+            "source": "[https://github.com/anubisnekhet/anuppuccin/issues](https://github.com/anubisnekhet/anuppuccin/issues)",
+            "target": "[https://github.com/anubisnekhet/anuppuccin/issues](https://github.com/anubisnekhet/anuppuccin/issues)"
+        }
+    ]
+}

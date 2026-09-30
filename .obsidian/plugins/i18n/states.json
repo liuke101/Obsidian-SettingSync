@@ -1,0 +1,216 @@
+{
+    "plugins": {
+        "obsidian42-brat": {
+            "id": "obsidian42-brat",
+            "isApplied": true,
+            "pluginVersion": "2.0.4",
+            "translationVersion": "1.0.0"
+        },
+        "code-styler": {
+            "id": "code-styler",
+            "isApplied": true,
+            "pluginVersion": "1.1.7",
+            "translationVersion": "2.0.0"
+        },
+        "oz-clear-unused-images": {
+            "id": "oz-clear-unused-images",
+            "isApplied": true,
+            "pluginVersion": "1.1.1",
+            "translationVersion": "2.0.0"
+        },
+        "cmdr": {
+            "id": "cmdr",
+            "isApplied": true,
+            "pluginVersion": "0.5.5",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-completr": {
+            "id": "obsidian-completr",
+            "isApplied": true,
+            "pluginVersion": "3.2.0",
+            "translationVersion": "2.0.0"
+        },
+        "consistent-attachments-and-links": {
+            "id": "consistent-attachments-and-links",
+            "isApplied": true,
+            "pluginVersion": "3.33.4",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-copy-block-link": {
+            "id": "obsidian-copy-block-link",
+            "isApplied": true,
+            "pluginVersion": "1.0.4",
+            "translationVersion": "2.0.0"
+        },
+        "obsidian-diagrams-net": {
+            "id": "obsidian-diagrams-net",
+            "isApplied": true,
+            "pluginVersion": "1.0.4",
+            "translationVersion": "1.0.0"
+        },
+        "easy-typing-obsidian": {
+            "id": "easy-typing-obsidian",
+            "isApplied": true,
+            "pluginVersion": "6.0.7",
+            "translationVersion": "1.0.0"
+        },
+        "editing-toolbar": {
+            "id": "editing-toolbar",
+            "isApplied": true,
+            "pluginVersion": "4.0.7",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-emoji-toolbar": {
+            "id": "obsidian-emoji-toolbar",
+            "isApplied": true,
+            "pluginVersion": "1.0.0",
+            "translationVersion": "1.0.0"
+        },
+        "file-order": {
+            "id": "file-order",
+            "isApplied": true,
+            "pluginVersion": "0.0.14",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-git": {
+            "id": "obsidian-git",
+            "isApplied": true,
+            "pluginVersion": "2.38.2",
+            "translationVersion": "1.0.0"
+        },
+        "highlightr-plugin": {
+            "id": "highlightr-plugin",
+            "isApplied": true,
+            "pluginVersion": "1.2.2",
+            "translationVersion": "2.0.0"
+        },
+        "obsidian-hover-editor": {
+            "id": "obsidian-hover-editor",
+            "isApplied": true,
+            "pluginVersion": "0.11.29",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-icon-folder": {
+            "id": "obsidian-icon-folder",
+            "isApplied": true,
+            "pluginVersion": "2.14.7",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-latex-suite": {
+            "id": "obsidian-latex-suite",
+            "isApplied": true,
+            "pluginVersion": "1.11.5",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-link-converter": {
+            "id": "obsidian-link-converter",
+            "isApplied": true,
+            "pluginVersion": "0.1.6",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-minimal-settings": {
+            "id": "obsidian-minimal-settings",
+            "isApplied": true,
+            "pluginVersion": "8.2.1",
+            "translationVersion": "1.0.0"
+        },
+        "mousewheel-image-zoom": {
+            "id": "mousewheel-image-zoom",
+            "isApplied": true,
+            "pluginVersion": "1.0.24",
+            "translationVersion": "2.0.0"
+        },
+        "number-headings-obsidian": {
+            "id": "number-headings-obsidian",
+            "isApplied": true,
+            "pluginVersion": "1.16.0",
+            "translationVersion": "2.0.0"
+        },
+        "omnisearch": {
+            "id": "omnisearch",
+            "isApplied": true,
+            "pluginVersion": "1.28.2",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-outliner": {
+            "id": "obsidian-outliner",
+            "isApplied": true,
+            "pluginVersion": "4.10.0",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-plugin-update-tracker": {
+            "id": "obsidian-plugin-update-tracker",
+            "isApplied": true,
+            "pluginVersion": "1.7.0",
+            "translationVersion": "1.0.0"
+        },
+        "quick-latex": {
+            "id": "quick-latex",
+            "isApplied": true,
+            "pluginVersion": "2.6.5",
+            "translationVersion": "2.0.0"
+        },
+        "obsidian-quiet-outline": {
+            "id": "obsidian-quiet-outline",
+            "isApplied": true,
+            "pluginVersion": "0.5.12",
+            "translationVersion": "1.0.0"
+        },
+        "recent-files-obsidian": {
+            "id": "recent-files-obsidian",
+            "isApplied": true,
+            "pluginVersion": "1.7.7",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-style-settings": {
+            "id": "obsidian-style-settings",
+            "isApplied": true,
+            "pluginVersion": "1.0.9",
+            "translationVersion": "2.0.0"
+        },
+        "templater-obsidian": {
+            "id": "templater-obsidian",
+            "isApplied": true,
+            "pluginVersion": "2.19.3",
+            "translationVersion": "1.0.0"
+        },
+        "obsidian-local-images-plus": {
+            "id": "obsidian-local-images-plus",
+            "isApplied": true,
+            "pluginVersion": "0.16.4",
+            "translationVersion": "1.0.0"
+        },
+        "backlink-cache": {
+            "id": "backlink-cache",
+            "isApplied": true,
+            "pluginVersion": "2.12.1",
+            "translationVersion": "1.0.0"
+        },
+        "pexels-banner": {
+            "id": "pexels-banner",
+            "isApplied": true,
+            "pluginVersion": "3.6.18",
+            "translationVersion": "2.0.0"
+        },
+        "unique-attachments": {
+            "id": "unique-attachments",
+            "isApplied": true,
+            "pluginVersion": "1.0.4",
+            "translationVersion": "1.0.0"
+        },
+        "codeblock-customizer": {
+            "id": "codeblock-customizer",
+            "isApplied": true,
+            "pluginVersion": "1.4.7",
+            "translationVersion": "1.0.0"
+        }
+    },
+    "themes": {
+        "Baseline": {
+            "id": "Baseline",
+            "isApplied": true,
+            "pluginVersion": "3.2.9",
+            "translationVersion": "1.0.0"
+        }
+    }
+}

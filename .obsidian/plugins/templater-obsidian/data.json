@@ -1,0 +1,31 @@
+{
+  "data_version": 2,
+  "command_timeout": 5,
+  "templates_folder": "zip/Templates",
+  "templates_pairs": [],
+  "trigger_on_file_creation_mode": "folder",
+  "auto_jump_to_cursor": false,
+  "jump_to_cursor_after_file_name": false,
+  "shell_path": "",
+  "user_scripts_folder": "",
+  "folder_templates": [
+    {
+      "folder": "/",
+      "template": "zip/Templates/yaml_PixelBanner.md"
+    }
+  ],
+  "file_templates": [],
+  "syntax_highlighting": true,
+  "syntax_highlighting_mobile": false,
+  "enabled_templates_hotkeys": [
+    "zip/Templates/yaml_Banner.md",
+    "zip/Templates/yaml_noBanner.md",
+    "zip/Templates/markmap脑图.md",
+    "zip/Templates/mermaid流图.md",
+    "zip/Templates/yaml_PixelBanner.md"
+  ],
+  "startup_templates": [],
+  "intellisense_render": "1",
+  "ignore_folders_on_creation": [],
+  "enable_ribbon_icon": true
+}

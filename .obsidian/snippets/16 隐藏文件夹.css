@@ -1,0 +1,14 @@
+/* 隐藏assets 图片文件夹不显示 */
+div[data-path$='assets'],
+div[data-path$='assets']+div.nav-folder-children{
+    display: none;
+}
+
+/* 隐藏 icons 图片文件夹不显示 */
+div[data-path$='icons'],
+div[data-path$='icons']+div.nav-folder-children {
+    display: none;
+}
+
+
+
