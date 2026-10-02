@@ -1,0 +1,88 @@
+# ============================================================
+#  obsidian-sync 配置：有哪些库、共享什么、怎么链接
+#  新增一个库：在 [vaults] 里加一行，然后执行
+#      obsidian-sync new <路径>          （自动追加并立即建立链接）
+#  或手写一行后执行
+#      obsidian-sync link <库名>
+# ============================================================
+
+[general]
+# 仓库集合根目录（相对本文件所在目录，或写绝对路径）。
+# 下面所有相对路径都以它为基准。
+root = ".."
+
+# 共享内容母本：plugins / themes / snippets / zip / 各设置 json 都放这里
+# 注意：以下路径一律相对 root（不是相对本文件），root 默认就是本文件所在目录
+shared_dir = "Obsidian-Config"
+
+# 覆盖同名真实文件前是否自动备份到 backup_dir
+auto_backup = true
+backup_dir = "_backup"
+
+# 链接完成后自动校验一次
+verify = true
+
+
+# ------------------------------------------------------------
+# 默认共享规则（所有库适用）
+# ------------------------------------------------------------
+[links]
+
+# 目录：库内 <-> 母本 同名相对路径
+dirs = [
+  ".obsidian/plugins",
+  ".obsidian/themes",
+  ".obsidian/snippets",
+  "zip",
+]
+
+# 文件
+files = [
+  ".obsidian/app.json",
+  ".obsidian/appearance.json",
+  ".obsidian/backlink.json",
+  ".obsidian/bookmarks.json",
+  ".obsidian/canvas.json",
+  ".obsidian/community-plugins.json",
+  ".obsidian/core-plugins.json",
+  ".obsidian/core-plugins-migration.json",
+  ".obsidian/daily-notes.json",
+  ".obsidian/file-recovery.json",
+  ".obsidian/graph.json",
+  ".obsidian/hotkeys.json",
+  ".obsidian/note-composer.json",
+  ".obsidian/page-preview.json",
+  ".obsidian/templates.json",
+  ".obsidian/types.json",
+]
+
+# 刻意不共享（各库保持独立，勿加入上面两个列表）：
+#   .obsidian/workspace.json          每个库的面板布局本来就不同
+#   .obsidian/workspace-mobile.json   同上
+#   .obsidian/webviewer.json          仅个别库有
+#   .trash/                           本地回收站
+
+
+# ------------------------------------------------------------
+# 配置档：给特殊库增减规则
+#   extend = true （默认）在默认规则上追加；false 则完全替换默认规则
+#
+# 注意：只把「各库应该一致」的东西放进共享清单。
+# 例如 .gitignore 看似通用，但每个仓库的忽略规则本就不同，属于本地文件，
+# 不该共享——这类误配会被 obsidian-sync check 直接报出来。
+#
+# 用法示例（默认未启用）：
+# [profiles.minimal]
+# extend = false
+# dirs = [".obsidian/plugins"]
+# files = [".obsidian/app.json"]
+
+
+# ------------------------------------------------------------
+# 库清单（键就是库名）
+# ------------------------------------------------------------
+[vaults]
+"AI"      = { path = "Obsidian-AI" }
+"GameDev" = { path = "Obsidian-GameDev" }
+"Misc"    = { path = "Obsidian-Misc" }
+"TechArt" = { path = "Obsidian-TechArt" }

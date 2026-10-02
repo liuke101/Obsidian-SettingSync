@@ -1,0 +1,16 @@
+[package]
+name = "obsidian-sync"
+version = "1.0.0"
+edition = "2021"
+description = "Obsidian 多仓库配置同步（符号链接）工具"
+
+[[bin]]
+name = "obsidian-sync"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
