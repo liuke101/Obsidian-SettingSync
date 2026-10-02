@@ -1,16 +1,17 @@
 @echo off
 rem ============================================================
-rem  启动 obsidian-sync 图形界面（免开终端敲命令）
-rem  双击本文件即可；浏览器会自动打开控制台。
+rem  Start obsidian-sync GUI (double-click this file)
+rem  Batch files are read in the system ANSI codepage,
+rem  so this file is intentionally kept ASCII-only.
 rem ============================================================
 setlocal
 cd /d "%~dp0"
 
 if not exist "bin\obsidian-sync.exe" (
-  echo 尚未构建，正在调用 build.cmd ...
+  echo [info] not built yet, running build.cmd ...
   call build.cmd
   if errorlevel 1 (
-    echo [错误] 构建失败，无法启动界面。
+    echo [error] build failed.
     pause
     exit /b 1
   )
@@ -19,7 +20,7 @@ if not exist "bin\obsidian-sync.exe" (
 "bin\obsidian-sync.exe" gui %*
 if errorlevel 1 (
   echo.
-  echo 界面已退出（若为报错，请查看上方信息）。
+  echo [info] GUI exited. Press any key to close.
   pause
 )
 endlocal
