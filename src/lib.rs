@@ -188,6 +188,10 @@ pub fn parse_args(args: &[String]) -> Result<Options, String> {
                 opts.port = if p == 0 { 7411 } else { p };
             }
             "--no-browser" => opts.no_browser = true,
+            // `new` 子命令的附加参数，交给 cmd_new 解析
+            other if other.starts_with("--name=") || other.starts_with("--profile=") => {
+                opts.positional.push(other.to_string());
+            }
             "-n" | "--dry-run" => opts.dry_run = true,
             "-f" | "--force" => opts.force = true,
             "--resolve" => {
@@ -281,6 +285,10 @@ pub fn discover_config() -> Result<PathBuf, String> {
 pub fn print_help() {
     println!(
         r#"obsidian-sync {VERSION} —— Obsidian 多仓库配置同步工具
+
+关注范围：**共享母本 + 登记的目标库**。
+上级目录里的其他东西（备份目录、工具仓库、临时目录等）一律不看不碰，
+由 sync.toml 的 [general] ignore 显式忽略。
 
 用法：
   obsidian-sync <命令> [选项]
@@ -670,9 +678,10 @@ pub fn summarize(rep: &Report) -> ExitCode {
 // ---------------------------------------------------------------- 命令实现
 
 pub fn cmd_list(cfg: &Config, out: &Output) -> Result<ExitCode, String> {
-    out.say(&format!("仓库集合根目录：{}", cfg.root.display()));
-    out.say(&format!("共享内容母本：  {}", cfg.shared_dir.display()));
-    out.say(&format!("配置文件：      {}", cfg.config_path.display()));
+    out.say("关注范围：共享母本 + 下列目标库；其余目录一律不看不碰。");
+    out.say(&format!("  共享母本（源）：{}", cfg.shared_dir.display()));
+    out.say(&format!("  备份目录：      {}", cfg.backup_dir.display()));
+    out.say(&format!("  配置文件：      {}", cfg.config_path.display()));
     out.say(&format!("\n默认共享规则：目录 {} 个，文件 {} 个，其他 {} 个",
         cfg.defaults.dirs.len(), cfg.defaults.files.len(), cfg.defaults.items.len()));
     out.say(&format!("\n已配置 {} 个库：", cfg.vaults.len()));
@@ -692,6 +701,15 @@ pub fn cmd_list(cfg: &Config, out: &Output) -> Result<ExitCode, String> {
             profile,
             exists
         ));
+    }
+    if !cfg.ignored_vaults.is_empty() {
+        out.say("\n已忽略（不参与任何操作）：");
+        for (name, rule) in &cfg.ignored_vaults {
+            out.say(&format!("  {name:<22} 命中规则 `{rule}`"));
+        }
+    }
+    if !cfg.ignore.is_empty() {
+        out.say(&format!("\n忽略规则：{}", cfg.ignore.join("、")));
     }
     Ok(ExitCode::SUCCESS)
 }
@@ -728,6 +746,16 @@ pub fn cmd_new(opts: &Options, out: &Output) -> Result<ExitCode, String> {
     };
     if !vault_path.is_dir() {
         return Err(format!("目录不存在：{}", vault_path.display()));
+    }
+    if let Some(rule) = config::matches_ignore(&vault_path, &cfg.ignore) {
+        return Err(format!(
+            "{} 命中忽略规则 `{rule}`，工具不会把它当作同步目标。\n  \
+             若确实要同步它，请从 sync.toml 的 [general] ignore 里去掉这条规则。",
+            vault_path.display()
+        ));
+    }
+    if vault_path == cfg.shared_dir {
+        return Err("共享母本自身不能作为同步目标。".into());
     }
 
     let vault_name = name.unwrap_or_else(|| {
@@ -789,9 +817,17 @@ pub fn select_vaults<'a>(cfg: &'a Config, names: &[String]) -> Result<Vec<&'a Va
     }
     let mut out = Vec::new();
     for n in names {
-        let v = cfg
-            .vault_by_name(n)
-            .ok_or_else(|| format!("配置里没有名为 {n} 的库"))?;
+        let v = cfg.vault_by_name(n).ok_or_else(|| {
+            if let Some((_, rule)) = cfg
+                .ignored_vaults
+                .iter()
+                .find(|(name, _)| name.eq_ignore_ascii_case(n))
+            {
+                format!("{n} 已被忽略规则 `{rule}` 排除（见 sync.toml 的 ignore），不会对它做任何操作")
+            } else {
+                format!("配置里没有名为 {n} 的库")
+            }
+        })?;
         out.push(v);
     }
     Ok(out)

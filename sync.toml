@@ -8,16 +8,31 @@
 
 [general]
 # 仓库集合根目录（相对本文件所在目录，或写绝对路径）。
-# 下面所有相对路径都以它为基准。
+# 它只是"把下面这些相对路径展开成绝对路径"的基准，本身不在同步范围内。
 root = ".."
 
-# 共享内容母本：plugins / themes / snippets / zip / 各设置 json 都放这里
-# 注意：以下路径一律相对 root（不是相对本文件），root 默认就是本文件所在目录
+# 共享内容母本：plugins / themes / snippets / zip / 各设置 json 都放这里。
+# 它是**唯一**允许作为链接源的地方。
 shared_dir = "Obsidian-Config"
 
-# 覆盖同名真实文件前是否自动备份到 backup_dir
+# 本工具的关注范围只有两样：上面的共享母本，以及下面 [vaults] 里登记的目标库。
+# 上级目录里的其他东西一律不看不碰 —— 由 ignore 显式列出：
+#   匹配"目录名"或"路径片段"，支持 * 与 ?；命中者即使登记在 [vaults] 也会被排除。
+ignore = [
+  ".*",                    # 所有点开头的目录（.backup / .acl-recovery / .git 等）
+  "_backup",               # 旧位置的备份目录
+  "_acl-recovery",         # 权限修复存档
+  "_trash-archive",
+  "Obsidian-SettingSync",  # 工具仓库自身
+  "desktop.ini",
+  "*.bak",
+]
+
+# 覆盖同名真实文件前是否自动备份。
+# 备份默认放在共享母本内部的 .backup，这样"配置 + 备份"是一体的，
+# 上级目录不再承担工具的运行时数据。
 auto_backup = true
-backup_dir = "_backup"
+# backup_dir = "Obsidian-Config/.backup"   # 需要时可显式指定
 
 # 链接完成后自动校验一次
 verify = true

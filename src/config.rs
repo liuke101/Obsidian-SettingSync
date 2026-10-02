@@ -104,13 +104,17 @@ pub struct VaultSpec {
 pub struct Config {
     /// vault 集合的根目录，用于把相对路径展开成绝对路径
     pub root: PathBuf,
-    /// 共享内容母本目录
+    /// 共享内容母本目录（唯一允许作为链接源的地方）
     pub shared_dir: PathBuf,
     /// 配置文件自身的位置
     pub config_path: PathBuf,
     pub defaults: LinkSet,
     pub profiles: HashMap<String, Profile>,
     pub vaults: Vec<VaultSpec>,
+    /// 被忽略的库（登记在案但命中忽略规则，不参与任何操作）：(库名, 命中的规则)
+    pub ignored_vaults: Vec<(String, String)>,
+    /// 忽略规则（匹配目录名或路径；支持 `*` 与 `?`）
+    pub ignore: Vec<String>,
     pub verify: bool,
     /// 是否在覆盖真实文件前自动备份
     pub auto_backup: bool,
@@ -120,6 +124,11 @@ pub struct Config {
 impl Config {
     pub fn vault_by_name(&self, name: &str) -> Option<&VaultSpec> {
         self.vaults.iter().find(|v| v.name.eq_ignore_ascii_case(name))
+    }
+
+    /// 被忽略的库名（供 `list` 与界面提示使用）。
+    pub fn ignored_names(&self) -> Vec<String> {
+        self.ignored_vaults.iter().map(|(n, _)| n.clone()).collect()
     }
 
     /// 某个库实际要链接的清单：默认规则 + 其 profile。
@@ -215,6 +224,64 @@ fn get_arr(table: &HashMap<String, Value>, key: &str) -> Vec<String> {
         .unwrap_or_default()
 }
 
+/// 忽略规则匹配：把路径统一成正斜杠小写后比较；支持 `*`（任意字符）与 `?`（单字符）。
+///
+/// 规则可以写成目录名（`_backup`、`_*`），也可以写成含分隔符的路径片段
+/// （`*/_backup`）。命中后该对象不参与任何操作——工具不会去动它，也不会删它。
+pub fn matches_ignore(path: &Path, rules: &[String]) -> Option<String> {
+    let full = path.to_string_lossy().replace('\\', "/").to_lowercase();
+    let name = path
+        .file_name()
+        .map(|s| s.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    for rule in rules {
+        let r = rule.trim().replace('\\', "/").to_lowercase();
+        if r.is_empty() {
+            continue;
+        }
+        if r.contains('/') {
+            if glob_match(&r, &full) || full.ends_with(&format!("/{r}")) {
+                return Some(rule.clone());
+            }
+        } else if glob_match(&r, &name) {
+            return Some(rule.clone());
+        }
+        // 名字规则同时作用于**任意一级路径片段**：
+        // 这样 `Obsidian-SettingSync` 既能挡住该目录本身，
+        // 也能挡住它下面的子目录（如 Obsidian-SettingSync/src）。
+        let seg_pattern = format!("*/{r}/*");
+        if glob_match(&seg_pattern, &full) {
+            return Some(rule.clone());
+        }
+    }
+    None
+}
+
+/// 极小通配符匹配：`*` 匹配任意长度，`?` 匹配单个字符。
+fn glob_match(pattern: &str, text: &str) -> bool {
+    let p: Vec<char> = pattern.chars().collect();
+    let t: Vec<char> = text.chars().collect();
+    let mut dp = vec![false; t.len() + 1];
+    dp[0] = true;
+    for i in 0..p.len() {
+        let mut next = vec![false; t.len() + 1];
+        if p[i] == '*' {
+            next[0] = dp[0];
+            for j in 1..=t.len() {
+                next[j] = dp[j] || next[j - 1];
+            }
+        } else {
+            for j in 1..=t.len() {
+                if dp[j - 1] && (p[i] == '?' || p[i] == t[j - 1]) {
+                    next[j] = true;
+                }
+            }
+        }
+        dp = next;
+    }
+    dp[t.len()]
+}
+
 /// 从文件加载配置。
 pub fn load(config_path: &Path, root_override: Option<&Path>) -> Result<Config, String> {
     let text = fs::read_to_string(config_path)
@@ -270,7 +337,10 @@ pub fn load(config_path: &Path, root_override: Option<&Path>) -> Result<Config, 
     }
 
     // ---- [vaults] ----
+    // 命中 ignore 的登记项不参与任何操作：工具不去看它、更不会动它。
+    let ignore = get_arr(&general, "ignore");
     let mut vaults = Vec::new();
+    let mut ignored_vaults = Vec::new();
     if let Some(table) = doc.section("vaults") {
         let mut names: Vec<&String> = table.keys().collect();
         names.sort();
@@ -285,17 +355,24 @@ pub fn load(config_path: &Path, root_override: Option<&Path>) -> Result<Config, 
                 _ => (None, None),
             };
             let raw_path = raw_path.ok_or_else(|| format!("[vaults] 的 {name} 缺少 path"))?;
+            let path = absolutize(Path::new(&raw_path), &root);
+            if let Some(rule) = matches_ignore(&path, &ignore) {
+                ignored_vaults.push((name.clone(), rule));
+                continue;
+            }
             vaults.push(VaultSpec {
                 name: name.clone(),
-                path: absolutize(Path::new(&raw_path), &root),
+                path,
                 profile,
             });
         }
     }
 
+    // 备份目录默认放在共享母本内部：这样"配置 + 备份"是一体的，
+    // 上级目录不必承担工具的运行时数据。
     let backup_dir = match get_str(general, "backup_dir") {
         Some(b) => absolutize(Path::new(&b), &root),
-        None => normalize(&root.join("_backup")),
+        None => normalize(&shared_dir.join(".backup")),
     };
 
     Ok(Config {
@@ -305,6 +382,8 @@ pub fn load(config_path: &Path, root_override: Option<&Path>) -> Result<Config, 
         defaults,
         profiles,
         vaults,
+        ignored_vaults,
+        ignore,
         verify: get_bool(general, "verify").unwrap_or(true),
         auto_backup: get_bool(general, "auto_backup").unwrap_or(true),
         backup_dir,
@@ -531,6 +610,60 @@ mod link_lifecycle_tests {
         assert!(!crate::same_file_content(&a, &c));
         assert!(!crate::same_file_content(&a, &dir.join("missing.txt")));
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    /// 忽略规则：目录名、路径片段、通配符，三种写法都要能命中。
+    #[test]
+    fn ignore_rules_match_names_paths_and_globs() {
+        let rules: Vec<String> = [
+            ".*",
+            "_backup",
+            "_acl-recovery",
+            "Obsidian-SettingSync",
+            "desktop.ini",
+            "*.bak",
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+
+        // 点开头的目录一律忽略
+        assert!(matches_ignore(Path::new(r"C:\V\.backup"), &rules).is_some());
+        assert!(matches_ignore(Path::new(r"C:\V\.acl-recovery"), &rules).is_some());
+        assert!(matches_ignore(Path::new(r"C:\V\.git"), &rules).is_some());
+        // 旧位置的备份目录与工具仓库
+        assert!(matches_ignore(Path::new(r"C:\V\_backup"), &rules).is_some());
+        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-SettingSync"), &rules).is_some());
+        // 通配符
+        assert!(matches_ignore(Path::new(r"C:\V\foo.bak"), &rules).is_some());
+        assert!(matches_ignore(Path::new(r"C:\V\desktop.ini"), &rules).is_some());
+
+        // 正常的库不应被误伤
+        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-AI"), &rules).is_none());
+        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-Config"), &rules).is_none());
+        assert!(matches_ignore(Path::new(r"C:\Users\LiuKe\Desktop\Obsidian-Test"), &rules).is_none());
+
+        // 含分隔符的路径片段写法
+        let p = vec!["*/_backup".to_string()];
+        assert!(matches_ignore(Path::new(r"C:\V\_backup"), &p).is_some());
+        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-AI"), &p).is_none());
+
+        // 名字规则要覆盖任意层级的片段，不只是顶层目录
+        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-SettingSync\src"), &rules).is_some());
+        assert!(matches_ignore(Path::new(r"C:\V\_backup\some\deep\dir"), &rules).is_some());
+        // 但正常库的子目录不该被误伤
+        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-AI\notes"), &rules).is_none());
+    }
+
+    #[test]
+    fn glob_basics() {
+        assert!(glob_match("*.bak", "x.bak"));
+        assert!(!glob_match("*.bak", "x.txt"));
+        assert!(glob_match("a?c", "abc"));
+        assert!(!glob_match("a?c", "abbc"));
+        assert!(glob_match(".*", ".backup"));
+        assert!(!glob_match(".*", "backup"));
+        assert!(glob_match("*", "anything"));
     }
 }
 

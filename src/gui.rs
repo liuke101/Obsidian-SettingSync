@@ -279,9 +279,17 @@ fn run_action(action: &str, body: &str, state: &AppState) -> Result<Json, String
     } else {
         let mut out = Vec::new();
         for n in &names {
-            let v = cfg
-                .vault_by_name(n)
-                .ok_or_else(|| format!("配置里没有名为 {n} 的库"))?;
+            let v = cfg.vault_by_name(n).ok_or_else(|| {
+                if let Some((_, rule)) = cfg
+                    .ignored_vaults
+                    .iter()
+                    .find(|(name, _)| name.eq_ignore_ascii_case(n))
+                {
+                    format!("{n} 已被忽略规则 `{rule}` 排除，工具不会对它做任何操作")
+                } else {
+                    format!("配置里没有名为 {n} 的库")
+                }
+            })?;
             out.push(v.clone());
         }
         out
@@ -402,6 +410,15 @@ fn add_vault(
 ) -> Result<(), String> {
     let raw = PathBuf::from(path_text);
     let vault_path = config::absolutize(&raw, &cfg.root);
+    if let Some(rule) = config::matches_ignore(&vault_path, &cfg.ignore) {
+        return Err(format!(
+            "{} 命中忽略规则 `{rule}`，工具不会把它当作同步目标（见 sync.toml 的 ignore）。",
+            vault_path.display()
+        ));
+    }
+    if vault_path == cfg.shared_dir {
+        return Err("共享母本自身不能作为同步目标。".into());
+    }
     if !vault_path.is_dir() {
         // 界面上明确说过"还不是 Obsidian 库会自动创建"，这里兑现该承诺：
         // 目录本身不存在时先建出来，并在 .obsidian 缺失时补一个空目录，
@@ -582,12 +599,25 @@ fn build_status(state: &AppState) -> Result<Json, String> {
         .map(|k| Json::str(k))
         .collect();
 
+    let ignored: Vec<Json> = cfg
+        .ignored_vaults
+        .iter()
+        .map(|(name, rule)| {
+            Json::obj(vec![
+                ("name", Json::str(name)),
+                ("rule", Json::str(rule)),
+            ])
+        })
+        .collect();
+
     Ok(Json::obj(vec![
         ("ok", Json::bool(true)),
         ("config", Json::str(&cfg.config_path.to_string_lossy())),
-        ("root", Json::str(&cfg.root.to_string_lossy())),
         ("sharedDir", Json::str(&cfg.shared_dir.to_string_lossy())),
         ("sharedOk", Json::bool(cfg.shared_dir.is_dir())),
+        ("backupDir", Json::str(&cfg.backup_dir.to_string_lossy())),
+        ("ignoreRules", Json::arr(cfg.ignore.iter().map(|r| Json::str(r)).collect())),
+        ("ignoredVaults", Json::arr(ignored)),
         ("symlinkOk", Json::bool(symlink_ok)),
         ("neededRepair", Json::bool(state.needed_repair.load(Ordering::SeqCst))),
         ("profiles", Json::arr(profiles)),

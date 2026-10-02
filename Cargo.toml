@@ -1,6 +1,6 @@
 [package]
 name = "obsidian-sync"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2021"
 description = "Obsidian 多仓库配置同步工具（命令行 + 内置图形界面）"
 
@@ -18,3 +18,4 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+

@@ -22,6 +22,7 @@
   h1{margin:0;font-size:20px;letter-spacing:.3px}
   .sub{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.9}
   .sub b{color:#b9c2d4;font-weight:600}
+  .sub .muted{color:#6b7488}
   .badge{display:inline-block;padding:1px 8px;border-radius:999px;
     font-size:12px;border:1px solid var(--line);background:var(--panel2)}
   .badge.ok{color:var(--ok);border-color:#1f4527}
@@ -217,10 +218,18 @@ function selectedVaults(){
 function render(s){
   STATE = s;
   $('#meta').innerHTML =
-    '<b>配置</b> ' + esc(s.config) + '<br>' +
-    '<b>仓库集合</b> ' + esc(s.root) + '<br>' +
-    '<b>共享母本</b> ' + esc(s.sharedDir) +
-    (s.sharedOk ? '' : ' <span class="badge err">不存在</span>');
+    '<b>共享母本（源）</b> ' + esc(s.sharedDir) +
+      (s.sharedOk ? '' : ' <span class="badge err">不存在</span>') + '<br>' +
+    '<b>备份目录</b> ' + esc(s.backupDir || '') + '<br>' +
+    '<b>配置文件</b> ' + esc(s.config) +
+    ((s.ignoreRules && s.ignoreRules.length)
+      ? '<br><b>已忽略</b> <span class="muted">' +
+          esc(s.ignoreRules.join('、')) +
+          ((s.ignoredVaults && s.ignoredVaults.length)
+            ? '（其中 ' + s.ignoredVaults.map(v => esc(v.name)).join('、') + ' 是登记过的库，已排除）'
+            : '') +
+        '</span>'
+      : '');
   const env = $('#envBadge');
   if (s.symlinkOk){
     env.className = 'badge ok';

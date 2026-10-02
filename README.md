@@ -3,13 +3,15 @@
 Obsidian 多仓库**配置共享**工具：让 N 个仓库共用同一份插件、主题、快捷键与模板，
 新增一个仓库只需一条命令——命令行与图形界面两种用法，行为完全一致。
 
-- 单文件可执行（`bin\obsidian-sync.exe`，约 350 KB），**不需要安装任何运行时**
+- 单文件可执行（`bin\obsidian-sync.exe`，约 380 KB），**不需要安装任何运行时**
 - **内置图形界面**：`bin\obsidian-sync.exe gui` 自动打开浏览器控制台
+- **关注范围只有两样**：共享母本（源）+ `sync.toml` 里登记的目标库；
+  其余目录由 `ignore` 规则显式排除，工具**不看不碰**（见第四节）
 - 声明式配置：`sync.toml` 描述「有哪些库、共享什么」
 - **按需提权**：能建符号链接就直接建；不能则目录自动回退为「目录联接」，不中断
 - **幂等**：重复执行只修复不一致的项，不会重建已正确的链接
 - **无损**：遇到同名真实文件先整体挪到备份目录，绝不直接删除
-- **可体检**：`check` 随时报告断链、错链、缺失、指错目标
+- **可体检**：`check` 随时报告断链、错链、缺失、指错目标与设置冲突
 
 ---
 
@@ -17,10 +19,11 @@ Obsidian 多仓库**配置共享**工具：让 N 个仓库共用同一份插件�
 
 | 要点 | 做法 |
 |---|---|
-| 部署 | Rust 单文件 exe（约 350 KB），零运行时依赖，复制即用 |
+| 部署 | Rust 单文件 exe（约 380 KB），零运行时依赖，复制即用 |
 | 界面 | 内置本机 HTTP 服务 + 单页界面，**不引入任何 GUI 框架**，仍是单文件 |
+| 关注范围 | 只认「共享母本 + 登记的目标库」，其余由 `ignore` 排除，不扫描上级目录 |
 | 配置 | 读 `sync.toml`，规则写一次到处适用，不靠每次手填 |
-| 删除行为 | **永不删除真实文件**，只整体挪到 `_backup`；默认遇到就跳过 |
+| 删除行为 | **永不删除真实文件**，只整体挪到备份目录；默认遇到就跳过 |
 | 正确性 | `link` 后自动校验，`check` / `doctor` 可随时体检 |
 | 新增库 | 界面点一下，或 `obsidian-sync new <路径>`，都会登记并建链 |
 
@@ -74,7 +77,49 @@ bin\obsidian-sync.exe gui
 
 ---
 
-## 四、命令行用法
+## 四、关注范围与忽略规则
+
+工具**只关注两样东西**：
+
+1. **共享母本**（`shared_dir`，即 `Obsidian-Config`）——唯一允许作为链接源的地方；
+2. **`sync.toml` 里 `[vaults]` 登记的目标库**。
+
+除此之外，**上级目录里的任何东西都不看、不碰、不扫描**。这不是"约定"，而是有代码约束的：
+
+- 工具从不遍历上级目录，只按登记项逐个访问；
+- `[general] ignore` 里的规则会在配置加载时过滤登记项，命中者**不参与任何操作**；
+- 试图把被忽略的路径登记为库会被**直接拒绝**，并说明命中了哪条规则；
+- 试图把共享母本自身登记为库同样被拒绝。
+
+```toml
+[general]
+ignore = [
+  ".*",                    # 所有点开头的目录（.backup / .acl-recovery / .git 等）
+  "_backup",               # 旧位置的备份目录
+  "_acl-recovery",         # 权限修复存档
+  "_trash-archive",
+  "Obsidian-SettingSync",  # 工具仓库自身
+  "desktop.ini",
+  "*.bak",
+]
+```
+
+规则写法：匹配**目录名**（`_backup`）或**含分隔符的路径片段**（`*/_backup`），
+支持 `*` 与 `?`；名字规则同时作用于任意层级，因此 `Obsidian-SettingSync`
+也能挡住它下面的子目录。
+
+工具自己的运行时数据也放在母本内部，上级目录不必承担：
+
+| 数据 | 位置 |
+|---|---|
+| 被替换掉的真实文件（覆盖前备份 / 冲突解析） | `Obsidian-Config\.backup\` |
+| 权限修复回滚存档（一次性，可删） | `Obsidian-Config\.acl-recovery\` |
+
+这两项已在母本的 `.gitignore` 中排除——**配置上云，备份不上云**。
+
+---
+
+## 五、命令行用法
 
 在仓库集合根目录（或任意子目录）执行，工具会自己向上找到 `sync.toml`：
 
@@ -109,7 +154,7 @@ bin\obsidian-sync.exe link GameDev
 :: 预演，不动任何文件
 bin\obsidian-sync.exe link --dry-run
 
-:: 解决"设置冲突"（新库首次被 Obsidian 打开后最常见的问题，见第五节）
+:: 解决"设置冲突"（新库首次被 Obsidian 打开后最常见的问题，见第六节）
 bin\obsidian-sync.exe link --resolve
 
 :: 移除共享链接（真实文件与本地文件不动），换机器或不再共享时用
@@ -124,7 +169,7 @@ bin\obsidian-sync.exe -c D:\other\sync.toml link
 
 ---
 
-## 五、设置冲突：新库为什么会有几项链接不上
+## 六、设置冲突：新库为什么会有几项链接不上
 
 **现象**：新建的库执行 `link` 后，总有几个文件（通常是 `app.json`、`appearance.json`、
 `core-plugins.json`、`graph.json`）报告"冲突"而不是"建立"。
@@ -142,7 +187,7 @@ bin\obsidian-sync.exe link --resolve
 
 处理方式是三步，全程不丢数据：
 
-1. 把冲突的真实文件**整体移动**（不是删除、不是复制）到 `_backup\<库名>-<时间戳>\`；
+1. 把冲突的真实文件**整体移动**（不是删除、不是复制）到 `Obsidian-Config\.backup\<库名>-<时间戳>\`；
 2. 在原位置建立指向共享母本的链接；
 3. 顺带告诉你原文件内容**是否与母本一致**——一致说明那只是 Obsidian 生成的默认值，
    不同则说明是 Obsidian 的默认值或本地改动，两样都留在备份里，随时可还原。
@@ -152,7 +197,7 @@ bin\obsidian-sync.exe link --resolve
 
 ---
 
-## 六、权限：为什么有时需要管理员
+## 七、权限：为什么有时需要管理员
 
 Windows 上创建**符号链接**需要「管理员权限」或「开发者模式」二者之一：
 
@@ -170,14 +215,14 @@ Windows 上创建**符号链接**需要「管理员权限」或「开发者模�
 
 ---
 
-## 七、配置文件 `sync.toml`
+## 八、配置文件 `sync.toml`
 
 ```toml
 [general]
 root = ".."                          # 仓库集合根目录（相对本文件），下面所有相对路径都以它为基准
 shared_dir = "Obsidian-Config"       # 共享内容母本
 auto_backup = true                   # 覆盖真实文件前自动备份
-backup_dir = "_backup"
+# backup_dir 默认即 Obsidian-Config/.backup，无需配置
 verify = true                        # 链接后自动校验
 
 [links]
@@ -203,7 +248,7 @@ dirs = [".obsidian/plugins"]
 
 ---
 
-## 八、目录结构
+## 九、目录结构
 
 ```
 ObsidianVault\
@@ -212,20 +257,25 @@ ObsidianVault\
 ├── Obsidian-Misc\           │ 每个库 20 条链接 → Obsidian-Config
 ├── Obsidian-TechArt\       ─┘
 ├── Obsidian-Config\        ← 共享内容母本（.obsidian + zip 资源），独立 git 仓库
+│   ├── .backup\            被替换掉的真实文件（不进 git）
+│   └── .acl-recovery\      权限修复回滚存档（一次性，可删）
 ├── Obsidian-SettingSync\   ← 本仓库：工具源码 + sync.toml
 │   ├── 启动界面.cmd         双击即启动图形界面
 │   ├── bin\obsidian-sync.exe
 │   ├── src\                工具源码（Rust）：lib.rs 引擎 / main.rs 命令行 / gui.rs 界面 / ui.html
-│   ├── sync.toml           库清单与共享规则
+│   ├── sync.toml           库清单、共享规则与忽略规则
 │   └── build.cmd
-└── _backup\                ← 被覆盖的真实文件备份
+└── desktop.ini             （系统文件，已列入 ignore）
 ```
+
+上级目录里**只有这些**：4 个内容库 + 母本 + 工具仓库。工具的运行时数据都在母本内部，
+所以上级目录不再堆 `_backup`、`_acl-recovery` 这类东西。
 
 工作方式的完整说明见 [`..\Obsidian-Config\README.md`](../Obsidian-Config/README.md)。
 
 ---
 
-## 九、开发
+## 十、开发
 
 ```cmd
 cargo test          :: 单元测试（含 sync.toml 形状校验）
@@ -247,6 +297,9 @@ CLI 与 GUI **调用同一套引擎函数**（`link_vault` / `verify_into` / `in
 所以两条入口的行为不会分叉；界面上的每个动作都等价于一条 CLI 命令。
 
 刻意**不引入任何第三方 crate**：这样构建不需要网络，二进制也不带供应链风险。
+
+
+
 
 
 
