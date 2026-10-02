@@ -31,3 +31,14 @@
 
 
 ![alt text](assets/PixPin_2026-04-09_21-49-59.png)
+
+## 重要变更（2026-10-02）
+
+配置母本已从本仓库迁出到独立目录 **`..\Obsidian-Config`**：
+
+- 本仓库现在**只承载工具本身**（源码 + `.sln`），不再存放 `.obsidian` 配置与共享 `zip` 资源。
+- 4 个内容库的软连接现在指向 `..\Obsidian-Config`，不再指向本仓库。
+- 换机器或链接丢失时的**完整重建步骤、共享清单与排除列表**，见
+  [`..\Obsidian-Config\README.md`](../Obsidian-Config/README.md)。
+- 使用本工具的「创建软连接」时，源路径请选择 `C:\ObsidianVault\Obsidian-Config`，
+  附加目录填 `zip`，排除列表须包含 `workspace.json`、`workspace-mobile.json`、`webviewer.json`。
