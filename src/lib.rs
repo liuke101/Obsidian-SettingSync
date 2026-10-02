@@ -176,9 +176,10 @@ pub fn parse_args(args: &[String]) -> Result<Options, String> {
             "-p" | "--port" => {
                 i += 1;
                 let v = args.get(i).ok_or("--port 后面缺少端口号")?;
-                opts.port = v
+                let p = v
                     .parse::<u16>()
                     .map_err(|_| format!("端口号无效：{v}"))?;
+                opts.port = if p == 0 { 7411 } else { p };
             }
             "--no-browser" => opts.no_browser = true,
             "-n" | "--dry-run" => opts.dry_run = true,

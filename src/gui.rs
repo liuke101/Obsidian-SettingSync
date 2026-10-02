@@ -68,14 +68,21 @@ impl GuiOptions {
 /// 启动图形界面，阻塞直到进程被中断。
 pub fn serve(opts: GuiOptions) -> Result<(), String> {
     capability()?;
+    // 端口 0 表示"让系统随机分配"，此时不能用它拼地址；未指定端口同样按默认端口处理。
+    let requested = if opts.port == 0 { DEFAULT_PORT } else { opts.port };
+
     // 启动前先确认配置可用，避免界面起来了却什么都做不了
     let cfg = load_config(&opts.engine_options())?;
 
-    let (listener, port) = bind(opts.port)?;
-    let url = format!("http://127.0.0.1:{port}/");
+    let (listener, port) = bind(requested)?;
+    // 关键：地址一律用内核实际分配的端口，而不是请求的端口
+    let url = format!("http://{}/", listener.local_addr().map_err(|e| e.to_string())?);
 
     println!("obsidian-sync 图形界面已启动");
     println!("  地址：{url}");
+    if port != requested {
+        println!("  （请求的端口 {requested} 被占用，已改用 {port}）");
+    }
     println!("  仓库集合：{}", cfg.root.display());
     println!("  共享母本：{}", cfg.shared_dir.display());
     println!("\n按 Ctrl+C 结束。");
@@ -102,14 +109,23 @@ pub fn serve(opts: GuiOptions) -> Result<(), String> {
             Err(_) => continue,
         }
     }
+    drop(listener);
     Ok(())
 }
 
+/// 绑定监听端口，返回监听器与**内核实际分配的端口**。
+///
+/// 注意：端口 0 在 TCP 里表示"由系统分配"，因此绝不能把请求的端口当作结果返回——
+/// 这正是曾经导致浏览器被打开到 `127.0.0.1:0` 的原因。
 fn bind(preferred: u16) -> Result<(TcpListener, u16), String> {
     for offset in 0..PORT_TRIES {
         let port = preferred.saturating_add(offset);
         if let Ok(listener) = TcpListener::bind(("127.0.0.1", port)) {
-            return Ok((listener, port));
+            let actual = listener
+                .local_addr()
+                .map_err(|e| format!("读取监听地址失败：{e}"))?
+                .port();
+            return Ok((listener, actual));
         }
     }
     Err(format!(
@@ -786,5 +802,32 @@ mod tests {
     fn urlencode_keeps_safe_chars() {
         assert_eq!(urlencode("Obsidian-AI"), "Obsidian-AI");
         assert_eq!(urlencode("a b"), "a%20b");
+    }
+
+    /// 回归测试：端口 0 必须由内核分配真实端口，且服务真的在监听。
+    /// 曾出现的 bug 是把请求的端口 0 当作地址拼进 URL，导致浏览器打开 127.0.0.1:0。
+    #[test]
+    fn port_zero_binds_a_real_port() {
+        let (listener, port) = bind(0).expect("bind should succeed");
+        assert_ne!(port, 0, "必须返回内核实际分配的端口");
+        let actual = listener.local_addr().expect("local_addr").port();
+        assert_eq!(port, actual, "返回的端口应与监听地址一致");
+        assert!(
+            format!("http://{}/", listener.local_addr().unwrap()).contains(&format!(":{actual}/")),
+            "拼出的地址里必须带真实端口"
+        );
+    }
+
+    /// 回归测试：默认端口被占用时自动顺延。
+    #[test]
+    fn falls_back_when_preferred_port_is_taken() {
+        let (first, first_port) = bind(0).expect("first bind");
+        let (second, second_port) = bind(first_port).expect("second bind");
+        assert_ne!(
+            first_port, second_port,
+            "首选端口被占用时必须换一个端口"
+        );
+        drop(first);
+        drop(second);
     }
 }
