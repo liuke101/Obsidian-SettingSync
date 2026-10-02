@@ -381,7 +381,36 @@ fn add_vault(
     let raw = PathBuf::from(path_text);
     let vault_path = config::absolutize(&raw, &cfg.root);
     if !vault_path.is_dir() {
-        return Err(format!("目录不存在：{}", vault_path.display()));
+        // 界面上明确说过"还不是 Obsidian 库会自动创建"，这里兑现该承诺：
+        // 目录本身不存在时先建出来，并在 .obsidian 缺失时补一个空目录，
+        // 让后续的链接有地方安放（Obsidian 之后打开会自行补全其余默认设置）。
+        std::fs::create_dir_all(&vault_path)
+            .map_err(|e| format!("创建目录失败 {}：{e}", vault_path.display()))?;
+        report.push(crate::Record {
+            vault: vault_path
+                .file_name()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_else(|| "vault".into()),
+            rel: "库目录".into(),
+            fate: Fate::Create,
+            method: String::new(),
+            detail: format!("目录不存在，已创建：{}", vault_path.display()),
+        });
+    }
+    let obsidian_dir = vault_path.join(".obsidian");
+    if !obsidian_dir.is_dir() {
+        std::fs::create_dir_all(&obsidian_dir)
+            .map_err(|e| format!("创建 .obsidian 失败：{e}"))?;
+        report.push(crate::Record {
+            vault: vault_path
+                .file_name()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_else(|| "vault".into()),
+            rel: ".obsidian".into(),
+            fate: Fate::Create,
+            method: String::new(),
+            detail: "不是 Obsidian 库，已创建空的 .obsidian 目录".into(),
+        });
     }
     let vault_name = name.unwrap_or_else(|| {
         vault_path
