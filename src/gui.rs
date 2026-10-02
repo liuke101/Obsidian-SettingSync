@@ -56,6 +56,7 @@ impl GuiOptions {
             root: self.root.clone(),
             dry_run: false,
             force: false,
+            resolve: false,
             no_verify: false,
             verbose: false,
             yes: true,
@@ -149,6 +150,7 @@ impl AppState {
             root: self.root.clone(),
             dry_run: false,
             force: false,
+            resolve: false,
             no_verify: false,
             verbose: false,
             yes: true,
@@ -295,9 +297,13 @@ fn run_action(action: &str, body: &str, state: &AppState) -> Result<Json, String
             state.needed_repair.store(fails > 0, Ordering::SeqCst);
         }
         "link" => {
+            // 界面默认开启冲突解析：新库首次打开后 Obsidian 会生成默认 .obsidian，
+            // 与共享母本冲突。解析方式始终是"先移入 _backup，再建立链接"，不丢数据。
             let force = json_get_bool(body, "force").unwrap_or(false);
+            let resolve = json_get_bool(body, "resolve").unwrap_or(true);
             let opts = Options {
-                force,
+                force: force || resolve,
+                resolve,
                 ..state.options()
             };
             for vault in &selected {
@@ -305,7 +311,7 @@ fn run_action(action: &str, body: &str, state: &AppState) -> Result<Json, String
             }
             let refs: Vec<&VaultSpec> = selected.iter().collect();
             verify_into(&cfg, &refs, &mut report, false);
-            state.needed_repair.store(false, Ordering::SeqCst);
+            state.needed_repair.store(report.failures() > 0, Ordering::SeqCst);
         }
         "unlink" => {
             for vault in &selected {
@@ -498,6 +504,7 @@ fn build_status(state: &AppState) -> Result<Json, String> {
         let mut links = Vec::new();
         let mut ok = 0usize;
         let mut bad = 0usize;
+        let mut conflicts = 0usize;
 
         for entry in &entries {
             let kind = entry.kind.resolve(&entry.rel);
@@ -525,7 +532,14 @@ fn build_status(state: &AppState) -> Result<Json, String> {
                     }
                     Existing::Real => {
                         bad += 1;
-                        ("real".to_string(), "是真实文件/目录，不是链接".to_string())
+                        conflicts += 1;
+                        // 区分"内容与母本一致"（Obsidian 生成的默认设置）与"内容不同"（有本地改动）
+                        let detail = if crate::same_file_content(&link_path, &target) {
+                            "冲突：内容与共享母本一致（Obsidian 生成的默认设置）".to_string()
+                        } else {
+                            "冲突：内容与共享母本不同，修复时会先备份".to_string()
+                        };
+                        ("conflict".to_string(), detail)
                     }
                     Existing::Missing => {
                         bad += 1;
@@ -557,6 +571,7 @@ fn build_status(state: &AppState) -> Result<Json, String> {
             ("total", Json::num(entries.len() as f64)),
             ("ok", Json::num(ok as f64)),
             ("bad", Json::num(bad as f64)),
+            ("conflicts", Json::num(conflicts as f64)),
             ("links", Json::arr(links)),
         ]));
     }
@@ -608,6 +623,7 @@ fn report_json(report: &Report) -> Json {
                     Json::str(match r.fate {
                         Fate::Fail => "error",
                         Fate::Create | Fate::Recreate | Fate::Remove => "change",
+                        Fate::Conflict => "conflict",
                         Fate::Skip => "skip",
                         Fate::Keep => "ok",
                     }),

@@ -86,3 +86,4 @@ files = [
 "GameDev" = { path = "Obsidian-GameDev" }
 "Misc"    = { path = "Obsidian-Misc" }
 "TechArt" = { path = "Obsidian-TechArt" }
+"Obsidian-Test" = { path = "C:/Users/LiuKe/Desktop/Obsidian-Test" }

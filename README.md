@@ -109,8 +109,8 @@ bin\obsidian-sync.exe link GameDev
 :: 预演，不动任何文件
 bin\obsidian-sync.exe link --dry-run
 
-:: 某库的 .obsidian 里已有真实配置文件，想用共享版覆盖（先备份再链接）
-bin\obsidian-sync.exe link NewVault --force
+:: 解决"设置冲突"（新库首次被 Obsidian 打开后最常见的问题，见第五节）
+bin\obsidian-sync.exe link --resolve
 
 :: 移除共享链接（真实文件与本地文件不动），换机器或不再共享时用
 bin\obsidian-sync.exe unlink -y
@@ -120,10 +120,39 @@ bin\obsidian-sync.exe -c D:\other\sync.toml link
 ```
 
 退出码：`0` 成功；`1` 有失败项（脚本里可直接判断）；`2` 用法或配置错误。
+**只有冲突、没有链接故障时退出码为 0**——冲突是可解释、可一键解决的状态，不算故障。
 
 ---
 
-## 四、权限：为什么有时需要管理员
+## 五、设置冲突：新库为什么会有几项链接不上
+
+**现象**：新建的库执行 `link` 后，总有几个文件（通常是 `app.json`、`appearance.json`、
+`core-plugins.json`、`graph.json`）报告"冲突"而不是"建立"。
+
+**原因**：新库一旦被 Obsidian 打开一次，Obsidian 就会在里面**生成一份自己的默认设置**。
+这些是真实文件，不是链接。工具的原则是**绝不擅自删除真实文件**，因此默认只报告冲突、不动它们。
+
+**解决**：
+
+```cmd
+bin\obsidian-sync.exe link --resolve
+```
+
+或在界面里点「解决全部冲突」按钮（界面默认就带 `resolve`）。
+
+处理方式是三步，全程不丢数据：
+
+1. 把冲突的真实文件**整体移动**（不是删除、不是复制）到 `_backup\<库名>-<时间戳>\`；
+2. 在原位置建立指向共享母本的链接；
+3. 顺带告诉你原文件内容**是否与母本一致**——一致说明那只是 Obsidian 生成的默认值，
+   不同则说明是 Obsidian 的默认值或本地改动，两样都留在备份里，随时可还原。
+
+> 为什么不做成"自动删除"：删除是不可逆的，而"移入备份"效果一样却可回退。
+> 本工具在设计上的一条硬规则是**永不删除用户的真实文件**。
+
+---
+
+## 六、权限：为什么有时需要管理员
 
 Windows 上创建**符号链接**需要「管理员权限」或「开发者模式」二者之一：
 
@@ -141,7 +170,7 @@ Windows 上创建**符号链接**需要「管理员权限」或「开发者模�
 
 ---
 
-## 五、配置文件 `sync.toml`
+## 七、配置文件 `sync.toml`
 
 ```toml
 [general]
@@ -174,7 +203,7 @@ dirs = [".obsidian/plugins"]
 
 ---
 
-## 六、目录结构
+## 八、目录结构
 
 ```
 ObsidianVault\
@@ -196,7 +225,7 @@ ObsidianVault\
 
 ---
 
-## 七、开发
+## 九、开发
 
 ```cmd
 cargo test          :: 单元测试（含 sync.toml 形状校验）
@@ -218,3 +247,6 @@ CLI 与 GUI **调用同一套引擎函数**（`link_vault` / `verify_into` / `in
 所以两条入口的行为不会分叉；界面上的每个动作都等价于一条 CLI 命令。
 
 刻意**不引入任何第三方 crate**：这样构建不需要网络，二进制也不带供应链风险。
+
+
+

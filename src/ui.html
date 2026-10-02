@@ -8,7 +8,7 @@
   :root{
     --bg:#0f1117; --panel:#171a22; --panel2:#1d212b; --line:#262b36;
     --text:#e6e9ef; --muted:#8b93a4; --accent:#6aa9ff;
-    --ok:#3fb950; --warn:#d29922; --err:#f85149; --change:#6aa9ff;
+    --ok:#3fb950; --warn:#d29922; --err:#f85149; --change:#6aa9ff; --conflict:#a371f7;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);
@@ -27,6 +27,7 @@
   .badge.ok{color:var(--ok);border-color:#1f4527}
   .badge.warn{color:var(--warn);border-color:#4a3a12}
   .badge.err{color:var(--err);border-color:#5a2220}
+  .badge.conflict{color:var(--conflict);border-color:#4b3a6b}
 
   .stats{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 18px}
   .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -51,6 +52,7 @@
   .vault.warn{border-left:3px solid var(--warn)}
   .vault.err{border-left:3px solid var(--err)}
   .vault.ok{border-left:3px solid var(--ok)}
+  .vault.conflict{border-left:3px solid var(--conflict)}
   .vhead{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer}
   .vhead:hover{background:#1b1f28}
   .vname{font-size:15px;font-weight:600;min-width:96px}
@@ -66,9 +68,17 @@
   .vbody .row:hover{background:#1b1f28}
   .dot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px}
   .dot.ok{background:var(--ok)} .dot.broken,.dot.real{background:var(--err)}
+  .dot.conflict{background:var(--conflict)}
   .dot.missing{background:var(--warn)} .dot.source-missing{background:#6b7280}
   .vbody .rel{font-family:Consolas,monospace;min-width:270px}
   .vbody .detail{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .banner{display:none;align-items:center;gap:14px;background:#241a33;
+    border:1px solid #4b3a6b;border-left:3px solid var(--conflict);
+    border-radius:10px;padding:12px 16px;margin-bottom:16px}
+  .banner.show{display:flex}
+  .banner .txt{flex:1;font-size:13.5px;line-height:1.7}
+  .banner b{color:#d8c4ff}
   .vfoot{display:flex;gap:8px;padding:10px 16px 2px;flex-wrap:wrap}
 
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
@@ -86,6 +96,7 @@
   #log .t{color:#5b6474;margin-right:8px}
   #log .ok{color:var(--ok)} #log .error{color:var(--err)}
   #log .change{color:var(--change)} #log .skip{color:var(--warn)}
+  #log .conflict{color:var(--conflict)}
   #log .head{color:#c9d1e0;margin-top:8px}
   .empty{color:var(--muted);padding:6px 0}
 
@@ -107,6 +118,16 @@
   </header>
 
   <div class="stats" id="stats"></div>
+
+  <div class="banner" id="conflictBanner">
+    <div class="txt">
+      <b>检测到 <span id="conflictCount">0</span> 项冲突。</b><br>
+      新库首次被 Obsidian 打开时会自动生成一份默认设置（<code>.obsidian/app.json</code> 等），
+      它们与共享母本冲突，导致这些设置无法共享。<br>
+      点右侧按钮即可解决：<b>原文件会先整体移入 <code>_backup</code></b>（不是删除，可随时还原），再改为共享链接。
+    </div>
+    <button class="primary" id="btnResolve">解决全部冲突</button>
+  </div>
 
   <div class="toolbar">
     <button class="primary" id="btnCheck">只体检（不改动）</button>
@@ -211,16 +232,22 @@ function render(s){
 
   const totalLinks = s.vaults.reduce((a,v) => a + v.total, 0);
   const totalBad = s.vaults.reduce((a,v) => a + v.bad, 0);
+  const totalConflicts = s.vaults.reduce((a,v) => a + (v.conflicts || 0), 0);
   const okVaults = s.vaults.filter(v => v.status === 'ok').length;
   $('#stats').innerHTML =
     stat(s.vaults.length, '已配置库') +
     stat(totalLinks, '共享链接项') +
     stat(okVaults + '/' + s.vaults.length, '完全正常的库') +
-    stat(totalBad, '需要修复的项', totalBad > 0 ? 'err' : '');
+    stat(totalBad, '需要修复的项', totalBad > 0 ? 'err' : '') +
+    (totalConflicts > 0 ? stat(totalConflicts, '设置冲突', 'conflict') : '');
+
+  $('#conflictCount').textContent = totalConflicts;
+  $('#conflictBanner').className = totalConflicts > 0 ? 'banner show' : 'banner';
 
   const box = $('#vaults');
   box.innerHTML = s.vaults.map(v => {
     const open = openSet.has(v.name) ? ' open' : '';
+    const vClass = (v.conflicts || 0) > 0 ? 'conflict' : v.status;
     const badge = v.status === 'ok'
       ? '<span class="badge ok">正常</span>'
       : (v.status === 'warn'
@@ -230,12 +257,13 @@ function render(s){
       '<div class="row"><span class="dot ' + esc(l.state) + '"></span>' +
       '<span class="rel">' + esc(l.rel) + '</span>' +
       '<span class="detail">' + esc(l.detail || '') + '</span></div>').join('');
-    return '<div class="vault ' + esc(v.status) + open + '" data-vault="' + esc(v.name) + '">' +
+    return '<div class="vault ' + esc(vClass) + open + '" data-vault="' + esc(v.name) + '">' +
       '<div class="vhead" onclick="toggleVault(this)">' +
         '<input type="checkbox" value="' + esc(v.name) + '" onclick="event.stopPropagation()">' +
         '<span class="vname">' + esc(v.name) + '</span>' +
         '<span class="vpath" title="' + esc(v.path) + '">' + esc(v.path) + '</span>' +
         badge +
+        ((v.conflicts || 0) > 0 ? '<span class="badge conflict">' + v.conflicts + ' 项冲突</span>' : '') +
         '<span class="counts"><b>' + v.ok + '</b>/' + v.total +
           (v.bad ? ' <span class="bad">(' + v.bad + ' 异常)</span>' : '') + '</span>' +
         '<span class="caret">▾</span>' +
@@ -243,6 +271,9 @@ function render(s){
       '<div class="vbody">' + rows +
         '<div class="vfoot">' +
           '<button class="ghost" onclick="act(\'link\',[\'' + esc(v.name) + '\'])">建立 / 修复此库</button>' +
+          ((v.conflicts || 0) > 0
+            ? '<button class="primary" onclick="act(\'link\',[\'' + esc(v.name) + '\'],{resolve:true})">解决此库冲突（' + v.conflicts + '）</button>'
+            : '') +
           '<button class="ghost" onclick="act(\'check\',[\'' + esc(v.name) + '\'])">体检此库</button>' +
           '<button class="ghost" onclick="act(\'open\',[\'' + esc(v.name) + '\'])">用 Obsidian 打开</button>' +
         '</div>' +
@@ -314,6 +345,16 @@ $('#btnUnlink').onclick = withBusy($('#btnUnlink'), async () => {
 $('#btnRefresh').onclick = withBusy($('#btnRefresh'), async () => {
   await api('/api/status');
   log('head', '已重新读取状态');
+});
+$('#btnResolve').onclick = withBusy($('#btnResolve'), async () => {
+  const scope = selectedVaults();
+  const what = scope.length ? scope.join('、') : '全部库';
+  const n = (STATE ? STATE.vaults.reduce((a,v) => a + (v.conflicts || 0), 0) : 0);
+  if (!confirm('将解决 ' + what + ' 的 ' + n + ' 项设置冲突。\n\n' +
+      '做法：把冲突的真实文件整体移入 _backup 目录（不是删除，可随时还原），' +
+      '然后改为指向共享母本的链接。\n\n继续？')) return;
+  const data = await act('link', scope, {resolve:true});
+  if (data.report && data.report.fail === 0) toast('冲突已解决', 'ok');
 });
 $('#addForm').onsubmit = async e => {
   e.preventDefault();

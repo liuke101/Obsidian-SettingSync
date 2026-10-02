@@ -1,6 +1,8 @@
 //! 配置模型：从 sync.toml 读取"有哪些库、共享什么、怎么链接"。
 
 use crate::toml::{parse, Doc, Value};
+#[cfg(test)]
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -362,6 +364,176 @@ mod path_tests {
         );
     }
 }
+
+#[cfg(test)]
+mod link_lifecycle_tests {
+    use super::*;
+    use crate::{link_vault, verify_into, Output, Report};
+    use std::fs;
+    use std::path::PathBuf;
+
+    /// 搭一个与真实布局同构的临时环境：配置 + 共享母本 + 一个空库。
+    fn setup(tag: &str) -> (PathBuf, PathBuf, PathBuf, PathBuf) {
+        let root = std::env::temp_dir().join(format!(
+            "obsidian-sync-test-{tag}-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map(|d| d.as_nanos())
+                .unwrap_or(0)
+        ));
+        let shared = root.join("Shared");
+        let vault = root.join("V1");
+        fs::create_dir_all(shared.join(".obsidian/plugins")).unwrap();
+        fs::create_dir_all(shared.join("zip/Templates")).unwrap();
+        fs::create_dir_all(vault.join(".obsidian")).unwrap();
+        fs::write(shared.join(".obsidian/app.json"), b"{\"shared\":true}\n").unwrap();
+        fs::write(shared.join(".obsidian/hotkeys.json"), b"{}\n").unwrap();
+        fs::write(shared.join("zip/Templates/t.md"), b"# t\n").unwrap();
+
+        let config_path = root.join("sync.toml");
+        let text = format!(
+            "[general]\nroot = \"{r}\"\nshared_dir = \"{r}/Shared\"\nbackup_dir = \"{r}/_backup\"\n\n\
+             [links]\ndirs = [\".obsidian/plugins\", \"zip\"]\nfiles = [\".obsidian/app.json\", \".obsidian/hotkeys.json\"]\n\n\
+             [vaults]\n\"V1\" = {{ path = \"{r}/V1\" }}\n",
+            r = root.to_string_lossy().replace('\\', "/")
+        );
+        fs::write(&config_path, text).unwrap();
+
+        let cfg = load(&config_path, None).expect("配置应能加载");
+        (root, shared, vault, cfg.config_path)
+    }
+
+    fn opts(resolve: bool) -> crate::Options {
+        let mut o = crate::parse_args(&["link".to_string()]).unwrap();
+        o.resolve = resolve;
+        o
+    }
+
+    fn cleanup(root: &Path) {
+        let _ = fs::remove_dir_all(root);
+    }
+
+    /// 全流程：空库 → 建链接 → 校验通过。
+    #[test]
+    fn links_an_empty_vault_then_passes_verification() {
+        let (root, _shared, vault, cfg_path) = setup("empty");
+        let cfg = load(&cfg_path, None).unwrap();
+        let v = cfg.vault_by_name("V1").unwrap().clone();
+
+        let mut rep = Report::default();
+        link_vault(&cfg, &v, &opts(false), &Output::silent(), &mut rep).unwrap();
+        assert_eq!(rep.failures(), 0, "空库建链不应有失败");
+        assert_eq!(rep.count(crate::Fate::Create), 4, "应建立 4 条链接");
+        assert!(vault.join(".obsidian/app.json").is_file());
+
+        let mut check = Report::default();
+        verify_into(&cfg, &[&v], &mut check, false);
+        assert_eq!(check.failures(), 0, "校验应无失败");
+        assert_eq!(check.count(crate::Fate::Conflict), 0, "校验不应报冲突");
+
+        cleanup(&root);
+    }
+
+    /// 幂等：再跑一次不应产生任何改动。
+    #[test]
+    fn linking_twice_is_idempotent() {
+        let (root, _shared, vault, cfg_path) = setup("idem");
+        let cfg = load(&cfg_path, None).unwrap();
+        let v = cfg.vault_by_name("V1").unwrap().clone();
+        let mut first = Report::default();
+        link_vault(&cfg, &v, &opts(false), &Output::silent(), &mut first).unwrap();
+
+        let mut second = Report::default();
+        link_vault(&cfg, &v, &opts(false), &Output::silent(), &mut second).unwrap();
+        assert_eq!(second.count(crate::Fate::Keep), 4, "第二次应全部保持");
+        assert_eq!(second.count(crate::Fate::Create), 0);
+
+        cleanup(&root);
+    }
+
+    /// 冲突 → 报告为冲突而非失败 → --resolve 备份并改为链接 → 校验通过。
+    /// 这条覆盖的正是"新库被 Obsidian 打开后生成默认设置"的真实场景。
+    #[test]
+    fn reports_conflict_then_resolves_it_with_backup() {
+        let (root, _shared, vault, cfg_path) = setup("conflict");
+        // 模拟 Obsidian 生成的默认设置：内容与共享母本不同
+        fs::write(vault.join(".obsidian/app.json"), b"{\"default\":true}\n").unwrap();
+
+        let cfg = load(&cfg_path, None).unwrap();
+        let v = cfg.vault_by_name("V1").unwrap().clone();
+
+        // 第一次：不解析，应报 1 项冲突、0 失败，且文件保持原样
+        let mut rep = Report::default();
+        link_vault(&cfg, &v, &opts(false), &Output::silent(), &mut rep).unwrap();
+        assert_eq!(rep.count(crate::Fate::Conflict), 1, "应报 1 项冲突");
+        assert_eq!(rep.failures(), 0, "冲突不算失败");
+        assert!(!crate::same_target(&vault.join(".obsidian/app.json"), &cfg.shared_dir.join(".obsidian/app.json")));
+        assert_eq!(
+            fs::read_to_string(vault.join(".obsidian/app.json")).unwrap(),
+            "{\"default\":true}\n",
+            "未解析时不得改动冲突文件"
+        );
+
+        // 校验也应把它归为冲突而不是失败
+        let mut check = Report::default();
+        verify_into(&cfg, &[&v], &mut check, false);
+        assert_eq!(check.count(crate::Fate::Conflict), 1);
+        assert_eq!(check.failures(), 0, "仅冲突时校验失败数应为 0");
+
+        // 第二次：--resolve，应备份并建立链接
+        let mut rep2 = Report::default();
+        link_vault(&cfg, &v, &opts(true), &Output::silent(), &mut rep2).unwrap();
+        assert_eq!(rep2.failures(), 0, "解析冲突不应失败");
+        assert_eq!(rep2.count(crate::Fate::Create), 1);
+        assert!(
+            crate::same_target(
+                &vault.join(".obsidian/app.json"),
+                &cfg.shared_dir.join(".obsidian/app.json")
+            ),
+            "解析后应指向共享母本"
+        );
+
+        // 备份必须存在，且内容是被替换掉的那份
+        let mut found = false;
+        for entry in fs::read_dir(&cfg.backup_dir).unwrap() {
+            let dir = entry.unwrap().path();
+            for f in fs::read_dir(&dir).unwrap() {
+                let p = f.unwrap().path();
+                if p.file_name().unwrap().to_string_lossy().contains("app.json") {
+                    assert_eq!(fs::read_to_string(&p).unwrap(), "{\"default\":true}\n");
+                    found = true;
+                }
+            }
+        }
+        assert!(found, "被替换的文件必须能在备份目录里找到");
+
+        // 收尾校验
+        let mut check2 = Report::default();
+        verify_into(&cfg, &[&v], &mut check2, false);
+        assert_eq!(check2.failures(), 0);
+        assert_eq!(check2.count(crate::Fate::Conflict), 0);
+
+        cleanup(&root);
+    }
+
+    #[test]
+    fn same_file_content_compares_bytes() {
+        let dir = std::env::temp_dir().join(format!("obsidian-sync-cmp-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let a = dir.join("a.txt");
+        let b = dir.join("b.txt");
+        let c = dir.join("c.txt");
+        fs::write(&a, b"hello").unwrap();
+        fs::write(&b, b"hello").unwrap();
+        fs::write(&c, b"world").unwrap();
+        assert!(crate::same_file_content(&a, &b));
+        assert!(!crate::same_file_content(&a, &c));
+        assert!(!crate::same_file_content(&a, &dir.join("missing.txt")));
+        let _ = fs::remove_dir_all(&dir);
+    }
+}
+
 
 
 

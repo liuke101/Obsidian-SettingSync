@@ -12,7 +12,7 @@ pub mod gui;
 pub mod toml;
 use config::{normalize, Config, EntryKind, VaultSpec};
 use std::fs;
-use std::io::{self, IsTerminal, Write};
+use std::io::{self, IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -25,6 +25,8 @@ pub enum Fate {
     Create,
     Recreate,
     Remove,
+    /// 目标位置已有真实文件/目录，本次未处理
+    Conflict,
     Skip,
     Fail,
 }
@@ -36,6 +38,7 @@ impl Fate {
             Fate::Create => "建立",
             Fate::Recreate => "重建",
             Fate::Remove => "移除",
+            Fate::Conflict => "冲突",
             Fate::Skip => "跳过",
             Fate::Fail => "失败",
         }
@@ -129,6 +132,8 @@ pub struct Options {
     root: Option<PathBuf>,
     dry_run: bool,
     force: bool,
+    /// 遇到目标位置的真实文件/目录时：备份后改为链接（否则只报告冲突）
+    resolve: bool,
     no_verify: bool,
     verbose: bool,
     yes: bool,
@@ -145,6 +150,7 @@ pub fn parse_args(args: &[String]) -> Result<Options, String> {
         root: None,
         dry_run: false,
         force: false,
+        resolve: false,
         no_verify: false,
         verbose: false,
         yes: false,
@@ -184,6 +190,10 @@ pub fn parse_args(args: &[String]) -> Result<Options, String> {
             "--no-browser" => opts.no_browser = true,
             "-n" | "--dry-run" => opts.dry_run = true,
             "-f" | "--force" => opts.force = true,
+            "--resolve" => {
+                opts.force = true;
+                opts.resolve = true;
+            }
             "--no-verify" => opts.no_verify = true,
             "-v" | "--verbose" => opts.verbose = true,
             "-y" | "--yes" => opts.yes = true,
@@ -292,7 +302,10 @@ pub fn print_help() {
   -p, --port <端口>     gui 监听端口（默认 7411，被占用时自动往后找）
       --no-browser      gui 启动后不自动打开浏览器
   -n, --dry-run         只显示将要做什么，不做任何改动
-  -f, --force           覆盖同名真实文件/目录前先备份（默认遇到就跳过）
+      --resolve         检测到冲突（目标位置已有真实文件/目录）时自动处理：
+                        先把原文件整体移入 _backup，再改为共享链接。
+                        新库首次打开后 Obsidian 会生成一份默认 .obsidian，
+                        正是这些文件会与共享母本冲突，本选项即用于一键解决。
   -y, --yes             不交互确认
       --no-verify       跳过链接后的校验
   -v, --verbose         输出每一项细节
@@ -601,7 +614,12 @@ pub fn print_records(rep: &Report, verbose: bool) {
             let show = verbose
                 || matches!(
                     r.fate,
-                    Fate::Create | Fate::Recreate | Fate::Remove | Fate::Fail | Fate::Skip
+                    Fate::Create
+                        | Fate::Recreate
+                        | Fate::Remove
+                        | Fate::Conflict
+                        | Fate::Fail
+                        | Fate::Skip
                 );
             if !show {
                 continue;
@@ -627,14 +645,21 @@ pub fn print_records(rep: &Report, verbose: bool) {
 
 pub fn summarize(rep: &Report) -> ExitCode {
     println!(
-        "\n小计：建立 {}，重建 {}，移除 {}，保持 {}，跳过 {}，失败 {}",
+        "\n小计：建立 {}，重建 {}，移除 {}，保持 {}，冲突 {}，跳过 {}，失败 {}",
         rep.count(Fate::Create),
         rep.count(Fate::Recreate),
         rep.count(Fate::Remove),
         rep.count(Fate::Keep),
+        rep.count(Fate::Conflict),
         rep.count(Fate::Skip),
         rep.failures()
     );
+    if rep.count(Fate::Conflict) > 0 {
+        println!(
+            "提示：{} 项因目标位置已有真实文件而未处理，加 --resolve 可自动备份并改为共享链接。",
+            rep.count(Fate::Conflict)
+        );
+    }
     if rep.failures() > 0 {
         ExitCode::from(1)
     } else {
@@ -850,13 +875,20 @@ pub fn link_vault(
                 continue;
             }
             Existing::Real => {
-                if !opts.force {
+                // 新库默认会自带一份 Obsidian 生成的默认设置，与共享母本冲突。
+                // 未开启 --resolve 时只报告冲突，不做任何改动。
+                if !opts.resolve {
+                    let hint = if same_file_content(&link_path, &target) {
+                        "内容与共享母本一致（Obsidian 生成的默认设置），加 --resolve 可直接替换"
+                    } else {
+                        "与共享母本内容不同，加 --resolve 会先备份再替换为共享链接"
+                    };
                     rep.push(Record {
                         vault: vault.name.clone(),
                         rel: entry.rel.clone(),
-                        fate: Fate::Skip,
+                        fate: Fate::Conflict,
                         method: String::new(),
-                        detail: "已存在真实文件/目录，未改动（加 --force 可先备份再链接）".into(),
+                        detail: hint.to_string(),
                     });
                     continue;
                 }
@@ -866,23 +898,39 @@ pub fn link_vault(
                         rel: entry.rel.clone(),
                         fate: Fate::Create,
                         method: String::new(),
-                        detail: "[dry-run] 将先备份再建立链接".into(),
+                        detail: "[dry-run] 将先备份冲突文件，再建立链接".into(),
                     });
                     continue;
                 }
-                if cfg.auto_backup {
-                    let backup = backup_path(cfg, &vault.name, &entry.rel)?;
-                    move_aside(&link_path, &backup)?;
-                    out.info(&format!("已备份到 {}", backup.display()));
-                } else {
-                    // auto_backup = false：整体挪走而不是删除，避免误删数据
-                    let backup = backup_path(cfg, &vault.name, &entry.rel)?;
-                    move_aside(&link_path, &backup)?;
-                    out.info(&format!(
-                        "已把原文件移到 {}（auto_backup=false 时仍不删除，只挪走）",
-                        backup.display()
-                    ));
+                // 解析冲突：先整体挪到备份目录（移动而非删除），再建立链接
+                let identical = same_file_content(&link_path, &target);
+                let backup = backup_path(cfg, &vault.name, &entry.rel)?;
+                move_aside(&link_path, &backup)?;
+                out.info(&format!(
+                    "冲突文件已移入备份：{}（内容与母本{}）",
+                    backup.display(),
+                    if identical { "一致" } else { "不同" }
+                ));
+                match create_link(&link_path, &target, kind) {
+                    Ok(method) => rep.push(Record {
+                        vault: vault.name.clone(),
+                        rel: entry.rel.clone(),
+                        fate: Fate::Create,
+                        method: method.label().into(),
+                        detail: format!(
+                            "原文件内容与母本{}，已备份到 _backup 后改为共享链接",
+                            if identical { "一致" } else { "不同" }
+                        ),
+                    }),
+                    Err(e) => rep.push(Record {
+                        vault: vault.name.clone(),
+                        rel: entry.rel.clone(),
+                        fate: Fate::Fail,
+                        method: String::new(),
+                        detail: format!("原文件已备份，但建立链接失败：{e}"),
+                    }),
                 }
+                continue;
             }
             Existing::BrokenLink { current } => {
                 if !opts.dry_run {
@@ -978,6 +1026,40 @@ pub fn rel_to_native(rel: &str) -> PathBuf {
     PathBuf::from(rel.replace('/', std::path::MAIN_SEPARATOR_STR))
 }
 
+/// 两个文件内容是否完全一致（用于判断冲突文件是不是 Obsidian 生成的默认设置）。
+/// 先比长度再逐字节比较，任一环节失败都返回 false。
+pub fn same_file_content(a: &Path, b: &Path) -> bool {
+    let (ma, mb) = match (fs::metadata(a), fs::metadata(b)) {
+        (Ok(x), Ok(y)) => (x, y),
+        _ => return false,
+    };
+    if !ma.is_file() || !mb.is_file() || ma.len() != mb.len() {
+        return false;
+    }
+    let (mut fa, mut fb) = match (fs::File::open(a), fs::File::open(b)) {
+        (Ok(x), Ok(y)) => (x, y),
+        _ => return false,
+    };
+    let mut buf_a = [0u8; 16384];
+    let mut buf_b = [0u8; 16384];
+    loop {
+        let na = match fa.read(&mut buf_a) {
+            Ok(n) => n,
+            Err(_) => return false,
+        };
+        let nb = match fb.read(&mut buf_b) {
+            Ok(n) => n,
+            Err(_) => return false,
+        };
+        if na != nb || buf_a[..na] != buf_b[..nb] {
+            return false;
+        }
+        if na == 0 {
+            return true;
+        }
+    }
+}
+
 pub fn backup_path(cfg: &Config, vault: &str, rel: &str) -> Result<PathBuf, String> {
     let stamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -1038,7 +1120,16 @@ pub fn verify_into(cfg: &Config, vaults: &[&VaultSpec], rep: &mut Report, verbos
                         None => "链接无法解析".to_string(),
                     },
                 ),
-                Existing::Real => (Fate::Fail, "不是链接（是真实文件/目录）".to_string()),
+                Existing::Real => {
+                    // 冲突不是"失败"：它是明确可解释、可一键解决的状态，
+                    // 单独归类可以让退出码与汇总反映真实情况。
+                    let detail = if same_file_content(&link_path, &target) {
+                        "冲突：目标位置是真实文件，内容与共享母本一致".to_string()
+                    } else {
+                        "冲突：目标位置是真实文件，内容与共享母本不同".to_string()
+                    };
+                    (Fate::Conflict, detail)
+                }
                 Existing::Missing => (Fate::Fail, "链接缺失".to_string()),
             };
             if fate == Fate::Keep && !verbose {
@@ -1065,16 +1156,30 @@ pub fn cmd_check(cfg: &Config, opts: &Options, out: &Output) -> Result<ExitCode,
     verify_into(cfg, &vaults, &mut rep, true);
     print_verify(&rep, out);
     let bad = rep.failures();
-    if bad == 0 {
+    let conflicts = rep.count(Fate::Conflict);
+    if bad == 0 && conflicts == 0 {
         out.say(&format!(
             "\n体检通过：{} 个库共 {} 项链接全部正确。",
             vaults.len(),
             rep.records.len()
         ));
-        Ok(ExitCode::SUCCESS)
-    } else {
-        out.say(&format!("\n发现 {bad} 项问题，可用 obsidian-sync link 修复。"));
+        return Ok(ExitCode::SUCCESS);
+    }
+    if conflicts > 0 {
+        out.say(&format!(
+            "\n发现 {conflicts} 项设置冲突（目标位置是真实文件，多为 Obsidian 首次打开时生成的默认设置）。"
+        ));
+        out.say("  解决：obsidian-sync link --resolve");
+        out.say("        （会把冲突文件整体移入 _backup 后再改为共享链接，不丢数据）");
+    }
+    if bad > 0 {
+        out.say(&format!("发现 {bad} 项链接问题，可用 obsidian-sync link 修复。"));
+    }
+    if bad > 0 {
         Ok(ExitCode::from(1))
+    } else {
+        // 仅存在冲突时不算失败：这是可解释、可一键解决的状态
+        Ok(ExitCode::SUCCESS)
     }
 }
 
@@ -1234,6 +1339,7 @@ pub fn cmd_doctor(opts: &Options, out: &Output) -> Result<ExitCode, String> {
         }
         let entries = cfg.entries_for(v).entries();
         let mut bad = Vec::new();
+        let mut conflicts = Vec::new();
         for e in &entries {
             let kind = e.kind.resolve(&e.rel);
             let target = cfg.shared_dir.join(rel_to_native(&e.rel));
@@ -1241,23 +1347,33 @@ pub fn cmd_doctor(opts: &Options, out: &Output) -> Result<ExitCode, String> {
             match inspect(&link_path, &target, kind) {
                 Existing::Link { .. } => {}
                 Existing::BrokenLink { .. } => bad.push(format!("{}（失效/指错）", e.rel)),
-                Existing::Real => bad.push(format!("{}（真实文件）", e.rel)),
+                Existing::Real => conflicts.push(format!("{}（真实文件）", e.rel)),
                 Existing::Missing => bad.push(format!("{}（缺失）", e.rel)),
             }
         }
-        if bad.is_empty() {
+        if bad.is_empty() && conflicts.is_empty() {
             out.say(&format!(
                 "  OK    {:<22} {} 项链接全部正确",
                 v.name,
                 entries.len()
             ));
+        } else if bad.is_empty() {
+            out.say(&format!(
+                "  ⚠    {:<22} {} 项设置冲突：{}",
+                v.name,
+                conflicts.len(),
+                conflicts.join("、")
+            ));
+            out.say("        多为新库首次被 Obsidian 打开时生成的默认设置；");
+            out.say("        用 obsidian-sync link --resolve 可一键解决（先备份再改链接）。");
+            problems += 1;
         } else {
             out.say(&format!(
                 "  ⚠    {:<22} {}/{} 项有问题：{}",
                 v.name,
-                bad.len(),
+                bad.len() + conflicts.len(),
                 entries.len(),
-                bad.join("、")
+                [bad.clone(), conflicts.clone()].concat().join("、")
             ));
             problems += 1;
         }
@@ -1281,5 +1397,7 @@ pub fn cmd_doctor(opts: &Options, out: &Output) -> Result<ExitCode, String> {
         Ok(ExitCode::from(1))
     }
 }
+
+
 
 
