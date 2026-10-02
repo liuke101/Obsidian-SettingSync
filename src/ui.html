@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>obsidian-sync 控制台</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a22; --panel2:#1d212b; --line:#262b36;
+    --text:#e6e9ef; --muted:#8b93a4; --accent:#6aa9ff;
+    --ok:#3fb950; --warn:#d29922; --err:#f85149; --change:#6aa9ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:14px/1.6 "Segoe UI","Microsoft YaHei",system-ui,sans-serif}
+  a{color:var(--accent)}
+  code{font-family:Consolas,"Cascadia Mono",monospace;font-size:12.5px}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+
+  header{display:flex;align-items:flex-start;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  h1{margin:0;font-size:20px;letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:6px;line-height:1.9}
+  .sub b{color:#b9c2d4;font-weight:600}
+  .badge{display:inline-block;padding:1px 8px;border-radius:999px;
+    font-size:12px;border:1px solid var(--line);background:var(--panel2)}
+  .badge.ok{color:var(--ok);border-color:#1f4527}
+  .badge.warn{color:var(--warn);border-color:#4a3a12}
+  .badge.err{color:var(--err);border-color:#5a2220}
+
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 18px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:10px 16px;min-width:118px}
+  .stat .n{font-size:22px;font-weight:600}
+  .stat .k{color:var(--muted);font-size:12px}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;margin-bottom:16px}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13.5px;
+    font-family:inherit;transition:.15s}
+  button:hover:not(:disabled){border-color:#3a4354;background:#232836}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.primary{background:#1d4ed8;border-color:#2563eb}
+  button.primary:hover:not(:disabled){background:#2563eb}
+  button.ghost{background:transparent}
+
+  .vault{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    margin-bottom:12px;overflow:hidden}
+  .vault.warn{border-left:3px solid var(--warn)}
+  .vault.err{border-left:3px solid var(--err)}
+  .vault.ok{border-left:3px solid var(--ok)}
+  .vhead{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer}
+  .vhead:hover{background:#1b1f28}
+  .vname{font-size:15px;font-weight:600;min-width:96px}
+  .vpath{color:var(--muted);font-size:12.5px;flex:1;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .counts{color:var(--muted);font-size:12.5px;white-space:nowrap}
+  .counts b{color:var(--text)}
+  .counts .bad{color:var(--err)}
+  .caret{color:var(--muted);width:12px;text-align:center}
+  .vbody{display:none;border-top:1px solid var(--line);padding:6px 0 10px}
+  .vault.open .vbody{display:block}
+  .vbody .row{display:flex;gap:12px;padding:3px 16px;font-size:12.5px}
+  .vbody .row:hover{background:#1b1f28}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px}
+  .dot.ok{background:var(--ok)} .dot.broken,.dot.real{background:var(--err)}
+  .dot.missing{background:var(--warn)} .dot.source-missing{background:#6b7280}
+  .vbody .rel{font-family:Consolas,monospace;min-width:270px}
+  .vbody .detail{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vfoot{display:flex;gap:8px;padding:10px 16px 2px;flex-wrap:wrap}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;margin-top:16px}
+  .panel h2{margin:0 0 10px;font-size:14px;font-weight:600;color:#c9d1e0}
+  form.add{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px}
+  input,select{background:#12151c;color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;width:100%}
+  input:focus,select:focus{outline:none;border-color:#3a4354}
+  .hint{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.8}
+  .hint code{color:#b9c2d4}
+
+  #log{max-height:300px;overflow:auto;font-family:Consolas,monospace;font-size:12.5px}
+  #log div{padding:2px 0;border-bottom:1px solid #1c2029;white-space:pre-wrap}
+  #log .t{color:#5b6474;margin-right:8px}
+  #log .ok{color:var(--ok)} #log .error{color:var(--err)}
+  #log .change{color:var(--change)} #log .skip{color:var(--warn)}
+  #log .head{color:#c9d1e0;margin-top:8px}
+  .empty{color:var(--muted);padding:6px 0}
+
+  #toast{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:9}
+  #toast div{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:8px;padding:10px 14px;max-width:380px;box-shadow:0 8px 24px #0008;font-size:13px}
+  #toast div.error{border-left-color:var(--err)}
+  #toast div.ok{border-left-color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>obsidian-sync 控制台</h1>
+      <div class="sub" id="meta">正在读取配置…</div>
+    </div>
+    <div><span class="badge" id="envBadge">环境检测中</span></div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <button class="primary" id="btnCheck">只体检（不改动）</button>
+    <button class="primary" id="btnLink">建立 / 修复链接</button>
+    <button class="ghost" id="btnUnlink">移除共享链接</button>
+    <button class="ghost" id="btnRefresh">重新读取</button>
+  </div>
+
+  <div id="vaults"></div>
+
+  <div class="panel">
+    <h2>把新仓库纳入同步</h2>
+    <form class="add" id="addForm">
+      <input id="addPath" placeholder="仓库目录，例如 C:\ObsidianVault\Obsidian-New" required>
+      <input id="addName" placeholder="库名（留空自动取目录名）">
+      <select id="addProfile"><option value="">（不使用配置档）</option></select>
+      <button class="primary" type="submit">添加并建立链接</button>
+    </form>
+    <div class="hint">
+      该操作会向 <code>sync.toml</code> 追加一行并把共享链接建好；
+      若目标目录还不是 Obsidian 库（没有 <code>.obsidian</code>），会先自动创建。
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>操作日志</h2>
+    <div id="log"><div class="empty">暂无操作。</div></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+let STATE = null;
+const openSet = new Set();
+
+function esc(s){
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+function toast(msg, kind){
+  const d = document.createElement('div');
+  d.className = kind || '';
+  d.textContent = msg;
+  $('#toast').appendChild(d);
+  setTimeout(() => d.remove(), 4200);
+}
+function log(kind, text){
+  const box = $('#log');
+  const empty = box.querySelector('.empty');
+  if (empty) empty.remove();
+  const d = document.createElement('div');
+  const t = new Date().toLocaleTimeString('zh-CN', {hour12:false});
+  d.innerHTML = '<span class="t">' + t + '</span><span class="' + esc(kind) + '">' + esc(text) + '</span>';
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+async function api(path, body){
+  const res = await fetch(path, body ? {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  } : undefined);
+  let data;
+  try { data = await res.json(); }
+  catch (e) { throw new Error('服务返回了无法解析的内容（HTTP ' + res.status + '）'); }
+  if (data.status) render(data.status);
+  return data;
+}
+function withBusy(btn, fn){
+  return async () => {
+    const old = btn.textContent;
+    btn.disabled = true; btn.textContent = '处理中…';
+    try { await fn(); }
+    catch (e) { toast(String(e.message || e), 'error'); log('error', '失败：' + (e.message || e)); }
+    finally { btn.disabled = false; btn.textContent = old; }
+  };
+}
+function selectedVaults(){
+  const names = [];
+  document.querySelectorAll('.vault input[type=checkbox]:checked')
+    .forEach(c => names.push(c.value));
+  return names;
+}
+function render(s){
+  STATE = s;
+  $('#meta').innerHTML =
+    '<b>配置</b> ' + esc(s.config) + '<br>' +
+    '<b>仓库集合</b> ' + esc(s.root) + '<br>' +
+    '<b>共享母本</b> ' + esc(s.sharedDir) +
+    (s.sharedOk ? '' : ' <span class="badge err">不存在</span>');
+  const env = $('#envBadge');
+  if (s.symlinkOk){
+    env.className = 'badge ok';
+    env.textContent = '符号链接可用';
+  } else {
+    env.className = 'badge warn';
+    env.textContent = '符号链接不可用：目录将回退为联接';
+  }
+
+  const totalLinks = s.vaults.reduce((a,v) => a + v.total, 0);
+  const totalBad = s.vaults.reduce((a,v) => a + v.bad, 0);
+  const okVaults = s.vaults.filter(v => v.status === 'ok').length;
+  $('#stats').innerHTML =
+    stat(s.vaults.length, '已配置库') +
+    stat(totalLinks, '共享链接项') +
+    stat(okVaults + '/' + s.vaults.length, '完全正常的库') +
+    stat(totalBad, '需要修复的项', totalBad > 0 ? 'err' : '');
+
+  const box = $('#vaults');
+  box.innerHTML = s.vaults.map(v => {
+    const open = openSet.has(v.name) ? ' open' : '';
+    const badge = v.status === 'ok'
+      ? '<span class="badge ok">正常</span>'
+      : (v.status === 'warn'
+          ? '<span class="badge warn">' + v.bad + ' 项待修复</span>'
+          : '<span class="badge err">目录不存在</span>');
+    const rows = v.links.map(l =>
+      '<div class="row"><span class="dot ' + esc(l.state) + '"></span>' +
+      '<span class="rel">' + esc(l.rel) + '</span>' +
+      '<span class="detail">' + esc(l.detail || '') + '</span></div>').join('');
+    return '<div class="vault ' + esc(v.status) + open + '" data-vault="' + esc(v.name) + '">' +
+      '<div class="vhead" onclick="toggleVault(this)">' +
+        '<input type="checkbox" value="' + esc(v.name) + '" onclick="event.stopPropagation()">' +
+        '<span class="vname">' + esc(v.name) + '</span>' +
+        '<span class="vpath" title="' + esc(v.path) + '">' + esc(v.path) + '</span>' +
+        badge +
+        '<span class="counts"><b>' + v.ok + '</b>/' + v.total +
+          (v.bad ? ' <span class="bad">(' + v.bad + ' 异常)</span>' : '') + '</span>' +
+        '<span class="caret">▾</span>' +
+      '</div>' +
+      '<div class="vbody">' + rows +
+        '<div class="vfoot">' +
+          '<button class="ghost" onclick="act(\'link\',[\'' + esc(v.name) + '\'])">建立 / 修复此库</button>' +
+          '<button class="ghost" onclick="act(\'check\',[\'' + esc(v.name) + '\'])">体检此库</button>' +
+          '<button class="ghost" onclick="act(\'open\',[\'' + esc(v.name) + '\'])">用 Obsidian 打开</button>' +
+        '</div>' +
+      '</div></div>';
+  }).join('') || '<div class="empty">还没有配置任何库，用下面的表单添加。</div>';
+
+  const sel = $('#addProfile');
+  const keep = sel.value;
+  sel.innerHTML = '<option value="">（不使用配置档）</option>' +
+    s.profiles.map(p => '<option value="' + esc(p) + '">' + esc(p) + '</option>').join('');
+  sel.value = keep;
+
+  if (s.neededRepair) toast('体检发现问题，点「建立 / 修复链接」即可修复', 'error');
+}
+function stat(n, k, cls){
+  return '<div class="stat"><div class="n ' + (cls || '') + '">' + esc(n) + '</div>' +
+    '<div class="k">' + esc(k) + '</div></div>';
+}
+function toggleVault(head){
+  const card = head.parentElement;
+  card.classList.toggle('open');
+  const name = card.dataset.vault;
+  if (card.classList.contains('open')) openSet.add(name); else openSet.delete(name);
+}
+function reportToLog(rep, title){
+  if (!rep) return;
+  log('head', '—— ' + title + ' ——');
+  const items = rep.items || [];
+  let shown = 0;
+  items.forEach(it => {
+    if (it.level === 'ok') return;
+    shown++;
+    log(it.level, '[' + it.vault + '] ' + it.rel + '  ' + (it.fate || '') +
+      (it.method ? '（' + it.method + '）' : '') + (it.detail ? '  ' + it.detail : ''));
+  });
+  if (!shown) log('ok', '没有需要改动的项');
+  log(rep.fail > 0 ? 'error' : 'ok',
+    '合计 ' + rep.total + ' 项，失败 ' + rep.fail + ' 项');
+}
+async function act(action, vaults, extra){
+  const body = Object.assign({vaults: (vaults || []).join(',')}, extra || {});
+  const titles = {
+    check:'体检', link:'建立 / 修复链接', unlink:'移除共享链接',
+    add:'添加仓库', open:'打开库'
+  };
+  const data = await api('/api/' + action, body);
+  if (data.ok === false && data.error) throw new Error(data.error);
+  if (action === 'open'){
+    log('ok', (data.report && data.report.items[0] && data.report.items[0].detail) || '已请求打开');
+    return data;
+  }
+  reportToLog(data.report, titles[action] || action);
+  if (data.report && data.report.fail === 0) toast('完成：' + (titles[action] || action), 'ok');
+  return data;
+}
+$('#btnCheck').onclick = withBusy($('#btnCheck'), async () => {
+  await act('check', selectedVaults());
+});
+$('#btnLink').onclick = withBusy($('#btnLink'), async () => {
+  await act('link', selectedVaults());
+});
+$('#btnUnlink').onclick = withBusy($('#btnUnlink'), async () => {
+  const scope = selectedVaults();
+  const what = scope.length ? scope.join('、') : '全部库';
+  if (!confirm('将移除 ' + what + ' 的共享链接。\n\n' +
+      '链接会被删除，真实文件和本地文件（workspace.json 等）不会被删除。\n\n继续？')) return;
+  await act('unlink', scope);
+});
+$('#btnRefresh').onclick = withBusy($('#btnRefresh'), async () => {
+  await api('/api/status');
+  log('head', '已重新读取状态');
+});
+$('#addForm').onsubmit = async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = '处理中…';
+  try {
+    const data = await act('add', null, {
+      path: $('#addPath').value.trim(),
+      name: $('#addName').value.trim(),
+      profile: $('#addProfile').value
+    });
+    if (data.report && data.report.fail === 0){
+      $('#addPath').value = ''; $('#addName').value = '';
+      toast('已添加并建立链接', 'ok');
+    }
+  } catch (err){
+    toast(String(err.message || err), 'error');
+    log('error', '失败：' + (err.message || err));
+  } finally {
+    btn.disabled = false; btn.textContent = old;
+  }
+};
+api('/api/status')
+  .then(() => log('head', '界面已就绪'))
+  .catch(e => { toast('无法读取状态：' + (e.message || e), 'error'); });
+</script>
+</body>
+</html>

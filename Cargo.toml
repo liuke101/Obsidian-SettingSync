@@ -1,8 +1,12 @@
 [package]
 name = "obsidian-sync"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
-description = "Obsidian 多仓库配置同步（符号链接）工具"
+description = "Obsidian 多仓库配置同步工具（命令行 + 内置图形界面）"
+
+[lib]
+name = "obsidian_sync"
+path = "src/lib.rs"
 
 [[bin]]
 name = "obsidian-sync"
