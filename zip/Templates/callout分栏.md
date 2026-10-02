@@ -1,9 +1,0 @@
-> [!multi-column] 
->
-> >[!NOTE] 
->  
->
-> >[!NOTE] 
-> 
-
-
