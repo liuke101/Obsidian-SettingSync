@@ -6,16 +6,6 @@
 /target/
 /bin/
 
-# ---- 旧版 C# 工具的构建产物（源码仍保留在 legacy/）----
-legacy/**/bin/
-legacy/**/obj/
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-*.user
-*.suo
-
 # ---- 系统与编辑器的临时文件 ----
 Thumbs.db
 desktop.ini
