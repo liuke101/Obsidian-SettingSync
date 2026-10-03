@@ -1,8 +1,8 @@
-//! obsidian-sync —— Obsidian 多仓库配置同步工具（符号链接方式）
+//! obsidian-sync —— Obsidian 多仓库配置同步工具（符号链接方式，Ubuntu/Linux）
 //!
 //! 本库是 CLI 与 GUI 共用的引擎，保证两条入口行为完全一致：
 //!   * 声明式配置：sync.toml 描述有哪些库、共享什么；新增库只需一条命令
-//!   * 按需提权：能创建符号链接就直接做，不能则目录自动回退为联接（junction）
+//!   * 原生符号链接：Linux 无需任何特殊权限；创建失败时明确报错，绝不静默降级
 //!   * 幂等：重复执行只修复不一致的项，不重建正确的链接
 //!   * 可验证：link 后自动校验；status 随时给出每个库的健康快照
 //!   * 无损：遇到真实的本地文件先备份再链接，绝不直接删除
@@ -74,7 +74,6 @@ impl Report {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LinkStrategy {
     Symlink,
-    Junction,
     Hardlink,
 }
 
@@ -82,7 +81,6 @@ impl LinkStrategy {
     pub fn label(self) -> &'static str {
         match self {
             LinkStrategy::Symlink => "符号链接",
-            LinkStrategy::Junction => "目录联接",
             LinkStrategy::Hardlink => "硬链接",
         }
     }
@@ -188,6 +186,13 @@ pub fn parse_args(args: &[String]) -> Result<Options, String> {
                 opts.port = if p == 0 { 7411 } else { p };
             }
             "--no-browser" => opts.no_browser = true,
+            // `new` 子命令的附加参数：空格形式 `--name X` 统一改写成 `--name=X`，
+            // 与等号形式一起交给 cmd_new 解析
+            flag @ ("--name" | "--profile") => {
+                i += 1;
+                let v = args.get(i).ok_or_else(|| format!("{flag} 后面缺少值"))?;
+                opts.positional.push(format!("{flag}={v}"));
+            }
             // `new` 子命令的附加参数，交给 cmd_new 解析
             other if other.starts_with("--name=") || other.starts_with("--profile=") => {
                 opts.positional.push(other.to_string());
@@ -325,49 +330,27 @@ pub fn print_help() {
 
 // ---------------------------------------------------------------- 链接引擎
 
-#[cfg(windows)]
-fn attributes_of(p: &Path) -> Option<u32> {
-    use std::os::windows::ffi::OsStrExt;
-    const INVALID: u32 = 0xFFFF_FFFF;
-    let wide: Vec<u16> = p
-        .as_os_str()
-        .encode_wide()
-        .chain(std::iter::once(0))
-        .collect();
-    let r = unsafe { GetFileAttributesW(wide.as_ptr()) };
-    if r == INVALID {
-        None
-    } else {
-        Some(r)
-    }
-}
-
-#[cfg(windows)]
-#[link(name = "kernel32")]
-extern "system" {
-    fn GetFileAttributesW(lp_file_name: *const u16) -> u32;
-}
-
-#[cfg(windows)]
-const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
-
-#[cfg(windows)]
-fn is_reparse_point(p: &Path) -> bool {
-    attributes_of(p)
-        .map(|a| a & FILE_ATTRIBUTE_REPARSE_POINT != 0)
-        .unwrap_or(false)
-}
-
-/// 读取链接目标。符号链接与目录联接都会返回 Some；真实文件返回 None。
+/// 读取链接目标。链接（含断链）返回 Some；真实文件/目录返回 None。
 pub fn read_link_target(p: &Path) -> Option<PathBuf> {
-    fs::read_link(p).ok().map(|t| config::strip_verbatim(&t))
+    fs::read_link(p).ok()
 }
 
-/// 判断两个路径是否指向同一对象。
-/// Windows 下链接目标可能是 `\\?\C:\...` 形式，先去掉该前缀再逐段比较。
+/// 判断链接是否指向 target（纯词法比较，不解析文件系统）。
+/// 相对形式的目标（如 `ln -s ../Obsidian-Config/x` 产生的链接）
+/// 先按链接所在目录展开再比较。
 pub fn same_target(link_path: &Path, target: &Path) -> bool {
     match read_link_target(link_path) {
-        Some(current) => normalize(&config::strip_verbatim(&current)) == normalize(target),
+        Some(current) => {
+            let current = if current.is_absolute() {
+                current
+            } else {
+                match link_path.parent() {
+                    Some(parent) => parent.join(current),
+                    None => current,
+                }
+            };
+            normalize(&current) == normalize(target)
+        }
         None => false,
     }
 }
@@ -378,16 +361,7 @@ pub fn link_resolves(p: &Path) -> bool {
     fs::metadata(p).is_ok()
 }
 
-/// Windows 上取文件的唯一标识（卷序列号 + 文件索引），用于识别硬链接。
-#[cfg(windows)]
-fn same_file_id(a: &Path, b: &Path) -> bool {
-    match (file_id(a), file_id(b)) {
-        (Some(x), Some(y)) => x == y,
-        _ => false,
-    }
-}
-
-#[cfg(not(windows))]
+/// 取文件的唯一标识（设备号 + inode），用于识别硬链接。
 fn same_file_id(a: &Path, b: &Path) -> bool {
     use std::os::unix::fs::MetadataExt;
     match (fs::metadata(a), fs::metadata(b)) {
@@ -396,118 +370,23 @@ fn same_file_id(a: &Path, b: &Path) -> bool {
     }
 }
 
-#[cfg(windows)]
-fn file_id(p: &Path) -> Option<(u32, u32, u32)> {
-    use std::os::windows::ffi::OsStrExt;
-    const GENERIC_READ: u32 = 0x8000_0000;
-    const FILE_SHARE_ALL: u32 = 0x1 | 0x2 | 0x4;
-    const OPEN_EXISTING: u32 = 3;
-    const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
-    const INVALID_HANDLE_VALUE: isize = -1;
-
-    let wide: Vec<u16> = p
-        .as_os_str()
-        .encode_wide()
-        .chain(std::iter::once(0))
-        .collect();
-    let handle = unsafe {
-        CreateFileW(
-            wide.as_ptr(),
-            GENERIC_READ,
-            FILE_SHARE_ALL,
-            std::ptr::null(),
-            OPEN_EXISTING,
-            FILE_FLAG_BACKUP_SEMANTICS,
-            std::ptr::null_mut(),
-        )
-    };
-    if handle as isize == INVALID_HANDLE_VALUE {
-        return None;
-    }
-    let mut info: ByHandleFileInformation = unsafe { std::mem::zeroed() };
-    let ok = unsafe { GetFileInformationByHandle(handle, &mut info) };
-    unsafe { CloseHandle(handle) };
-    if ok == 0 {
-        None
-    } else {
-        Some((
-            info.volume_serial_number,
-            info.file_index_high,
-            info.file_index_low,
-        ))
-    }
-}
-
-#[cfg(windows)]
-#[repr(C)]
-#[derive(Default, Clone, Copy)]
-struct FileTime {
-    low: u32,
-    high: u32,
-}
-
-#[cfg(windows)]
-#[repr(C)]
-#[derive(Default, Clone, Copy)]
-struct ByHandleFileInformation {
-    file_attributes: u32,
-    creation_time: FileTime,
-    last_access_time: FileTime,
-    last_write_time: FileTime,
-    volume_serial_number: u32,
-    file_size_high: u32,
-    file_size_low: u32,
-    number_of_links: u32,
-    file_index_high: u32,
-    file_index_low: u32,
-}
-
-#[cfg(windows)]
-#[link(name = "kernel32")]
-extern "system" {
-    fn CreateFileW(
-        lp_file_name: *const u16,
-        dw_desired_access: u32,
-        dw_share_mode: u32,
-        lp_security_attributes: *const std::ffi::c_void,
-        dw_creation_disposition: u32,
-        dw_flags_and_attributes: u32,
-        h_template_file: *mut std::ffi::c_void,
-    ) -> *mut std::ffi::c_void;
-    fn GetFileInformationByHandle(
-        h_file: *mut std::ffi::c_void,
-        lp_file_information: *mut ByHandleFileInformation,
-    ) -> i32;
-    fn CloseHandle(h_object: *mut std::ffi::c_void) -> i32;
-}
-
 pub fn inspect(link_path: &Path, target: &Path, kind: EntryKind) -> Existing {
     let meta = match fs::symlink_metadata(link_path) {
         Ok(m) => m,
         Err(_) => return Existing::Missing,
     };
 
-    #[cfg(windows)]
-    let reparse = is_reparse_point(link_path);
-    #[cfg(not(windows))]
-    let reparse = meta.file_type().is_symlink();
-
-    if meta.file_type().is_symlink() || reparse {
+    if meta.file_type().is_symlink() {
         let current = read_link_target(link_path);
         let points_right = same_target(link_path, target);
         let resolves = link_resolves(link_path);
         if points_right && resolves {
-            let method = if current.is_some() {
-                LinkStrategy::Symlink
-            } else {
-                LinkStrategy::Junction
-            };
-            return Existing::Link { method };
+            return Existing::Link { method: LinkStrategy::Symlink };
         }
         return Existing::BrokenLink { current };
     }
 
-    // 非重解析点：可能是硬链接（两个路径共享同一份数据）
+    // 非链接：可能是硬链接（两个路径共享同一份数据）
     if kind != EntryKind::Dir && target.exists() && same_file_id(link_path, target) {
         return Existing::Link { method: LinkStrategy::Hardlink };
     }
@@ -515,98 +394,57 @@ pub fn inspect(link_path: &Path, target: &Path, kind: EntryKind) -> Existing {
     Existing::Real
 }
 
+/// 创建符号链接：Linux 上目录与文件是同一个系统调用，且无需任何特殊权限。
+/// 符号链接失败即失败（提示会说明常见原因），绝不静默降级为其他链接形式。
 pub fn create_link(link_path: &Path, target: &Path, kind: EntryKind) -> Result<LinkStrategy, String> {
+    let _ = kind; // 目录与文件共用 std::os::unix::fs::symlink
     if let Some(parent) = link_path.parent() {
         fs::create_dir_all(parent).map_err(|e| format!("创建上级目录失败：{e}"))?;
     }
-
-    let symlink_result = match kind {
-        EntryKind::Dir => std::os::windows::fs::symlink_dir(target, link_path),
-        _ => std::os::windows::fs::symlink_file(target, link_path),
-    };
-    match symlink_result {
-        Ok(()) => return Ok(LinkStrategy::Symlink),
-        Err(e) => {
-            let symlink_err = e.to_string();
-            if kind == EntryKind::Dir {
-                // 目录回退：联接（junction）不需要管理员权限
-                match junction::create(target, link_path) {
-                    Ok(()) => return Ok(LinkStrategy::Junction),
-                    Err(je) => {
-                        return Err(format!(
-                            "符号链接失败（{symlink_err}），目录联接回退也失败（{je}）。\n\
-                             \x20   解决：以管理员身份运行本工具，或在 Windows「设置 → 系统 → 开发者选项」中开启开发者模式。"
-                        ))
-                    }
-                }
-            }
-            Err(format!(
-                "创建符号链接失败：{symlink_err}\n\
-                 \x20   文件无法回退为硬链接（硬链接与共享母本共用同一份数据，会带来静默分叉风险）。\n\
-                 \x20   解决：以管理员身份运行本工具，或在 Windows「设置 → 系统 → 开发者选项」中开启开发者模式。"
-            ))
-        }
-    }
+    std::os::unix::fs::symlink(target, link_path)
+        .map(|_| LinkStrategy::Symlink)
+        .map_err(|e| {
+            let hint = if e.kind() == io::ErrorKind::AlreadyExists {
+                "目标位置已存在同名的链接或文件".to_string()
+            } else if e.kind() == io::ErrorKind::PermissionDenied {
+                "当前账号对上级目录没有写权限".to_string()
+            } else {
+                "所在文件系统可能不支持符号链接（exFAT/FAT 的 U 盘、部分网络挂载不支持）".to_string()
+            };
+            format!("创建符号链接失败：{e}\n  \x20   {hint}")
+        })
 }
 
-/// 创建目录联接：通过 cmd 的 mklink /J 实现，避免引入额外依赖。
-mod junction {
-    use std::path::Path;
-    use std::process::Command;
-
-    pub fn create(target: &Path, link: &Path) -> Result<(), String> {
-        if link.exists() {
-            remove_link(link)?;
-        }
-        let out = Command::new("cmd")
-            .arg("/C")
-            .arg("mklink")
-            .arg("/J")
-            .arg(link)
-            .arg(target)
-            .output()
-            .map_err(|e| format!("调用 mklink 失败：{e}"))?;
-        if out.status.success() {
-            return Ok(());
-        }
-        let stderr = String::from_utf8_lossy(&out.stderr);
-        let stdout = String::from_utf8_lossy(&out.stdout);
-        Err(format!("{}{}", stdout.trim(), stderr.trim()))
-    }
-
-    /// 删掉一个链接本体，绝不跟随进入目标。
-    pub fn remove_link(link: &Path) -> Result<(), String> {
-        let out = Command::new("cmd")
-            .arg("/C")
-            .arg("rmdir")
-            .arg(link)
-            .output()
-            .map_err(|e| format!("调用 rmdir 失败：{e}"))?;
-        if out.status.success() {
-            Ok(())
-        } else {
-            Err(String::from_utf8_lossy(&out.stderr).trim().to_string())
-        }
-    }
+/// 移除一个失效链接（类型未知）：统一按 unlink 处理，不会进入链接目标。
+pub fn remove_broken_link(link_path: &Path) -> Result<(), String> {
+    fs::remove_file(link_path).map_err(|e| format!("删除链接失败：{e}"))
 }
 
-/// 删除链接本体（文件链接用 remove_file，目录链接用 rmdir，都不进入目标）。
+/// 删除链接本体（unlink，不进入目标；指向目录的链接同样用 unlink 删除）。
 pub fn remove_link(link_path: &Path, method: LinkStrategy) -> Result<(), String> {
     match method {
         LinkStrategy::Hardlink => Err("硬链接不自动删除（删它会连带共享母本的数据）".into()),
-        LinkStrategy::Junction => junction::remove_link(link_path),
-        LinkStrategy::Symlink => {
-            let is_dir = link_path.is_dir();
-            if is_dir {
-                junction::remove_link(link_path)
-            } else {
-                fs::remove_file(link_path).map_err(|e| format!("删除链接失败：{e}"))
-            }
-        }
+        LinkStrategy::Symlink => fs::remove_file(link_path).map_err(|e| format!("删除链接失败：{e}")),
     }
 }
 
 // ---------------------------------------------------------------- 报告输出
+
+/// 探测当前环境能否创建文件符号链接（doctor 与 GUI 共用）。
+/// 在临时目录里真实地建一次再清理，结论以实测为准。
+pub fn probe_symlink_support() -> bool {
+    let dir = std::env::temp_dir().join(format!("obsidian-sync-probe-{}", std::process::id()));
+    if fs::create_dir_all(&dir).is_err() {
+        return false;
+    }
+    let target = dir.join("target.txt");
+    let link = dir.join("link.txt");
+    let ok = fs::write(&target, b"probe").is_ok()
+        && create_link(&link, &target, EntryKind::File).is_ok();
+    let _ = fs::remove_file(&link);
+    let _ = fs::remove_dir_all(&dir);
+    ok
+}
 
 pub fn print_records(rep: &Report, verbose: bool) {
     let mut by_vault: Vec<(&str, Vec<&Record>)> = Vec::new();
@@ -804,8 +642,8 @@ pub fn cmd_new(opts: &Options, out: &Output) -> Result<ExitCode, String> {
 
 pub fn relative_to(base: &Path, p: &Path) -> String {
     p.strip_prefix(base)
-        .map(|s| s.to_string_lossy().replace('\\', "/"))
-        .unwrap_or_else(|_| p.to_string_lossy().replace('\\', "/"))
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_else(|_| p.to_string_lossy().to_string())
 }
 
 pub fn select_vaults<'a>(cfg: &'a Config, names: &[String]) -> Result<Vec<&'a VaultSpec>, String> {
@@ -821,7 +659,7 @@ pub fn select_vaults<'a>(cfg: &'a Config, names: &[String]) -> Result<Vec<&'a Va
             if let Some((_, rule)) = cfg
                 .ignored_vaults
                 .iter()
-                .find(|(name, _)| name.eq_ignore_ascii_case(n))
+                .find(|(name, _)| name == n)
             {
                 format!("{n} 已被忽略规则 `{rule}` 排除（见 sync.toml 的 ignore），不会对它做任何操作")
             } else {
@@ -872,11 +710,16 @@ pub fn link_vault(
     rep: &mut Report,
 ) -> Result<(), String> {
     if !vault.path.is_dir() {
-        return Err(format!(
-            "库目录不存在：{}（库名 {}）",
-            vault.path.display(),
-            vault.name
-        ));
+        // sync.toml 会被多台机器共用：登记在案但本机不存在的库只跳过、不报错，
+        // 免得一台机器的缺席让整条命令中断。
+        rep.push(Record {
+            vault: vault.name.clone(),
+            rel: "库目录".into(),
+            fate: Fate::Skip,
+            method: String::new(),
+            detail: format!("库目录不存在，已跳过：{}", vault.path.display()),
+        });
+        return Ok(());
     }
     out.say(&format!("\n== 处理 {} ==", vault.name));
     out.info(&format!("库目录：{}", vault.path.display()));
@@ -968,25 +811,18 @@ pub fn link_vault(
                 }
                 continue;
             }
-            Existing::BrokenLink { current } => {
+            Existing::BrokenLink { current: _ } => {
                 if !opts.dry_run {
                     // 断链 / 错链：直接替换，无需备份（里面没有用户数据）
-                    let method = match current {
-                        Some(_) => LinkStrategy::Symlink,
-                        None => LinkStrategy::Junction,
-                    };
-                    if let Err(e) = remove_link(&link_path, method) {
-                        // 联接回退：用 rmdir 再试一次
-                        if let Err(e2) = junction::remove_link(&link_path) {
-                            rep.push(Record {
-                                vault: vault.name.clone(),
-                                rel: entry.rel.clone(),
-                                fate: Fate::Fail,
-                                method: String::new(),
-                                detail: format!("清理失效链接失败：{e} / {e2}"),
-                            });
-                            continue;
-                        }
+                    if let Err(e) = remove_broken_link(&link_path) {
+                        rep.push(Record {
+                            vault: vault.name.clone(),
+                            rel: entry.rel.clone(),
+                            fate: Fate::Fail,
+                            method: String::new(),
+                            detail: format!("清理失效链接失败：{e}"),
+                        });
+                        continue;
                     }
                 }
                 let fate = Fate::Recreate;
@@ -1034,16 +870,12 @@ pub fn link_vault(
 
         match create_link(&link_path, &target, kind) {
             Ok(method) => {
-                let mut detail = String::new();
-                if method == LinkStrategy::Junction {
-                    detail = "符号链接失败，已回退为目录联接".into();
-                }
                 rep.push(Record {
                     vault: vault.name.clone(),
                     rel: entry.rel.clone(),
                     fate: Fate::Create,
                     method: method.label().into(),
-                    detail,
+                    detail: String::new(),
                 });
             }
             Err(e) => rep.push(Record {
@@ -1101,7 +933,7 @@ pub fn backup_path(cfg: &Config, vault: &str, rel: &str) -> Result<PathBuf, Stri
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0);
-    let flat = rel.replace(['/', '\\'], "_");
+    let flat = rel.replace('/', "_");
     let dir = cfg.backup_dir.join(format!("{vault}-{stamp}"));
     fs::create_dir_all(&dir).map_err(|e| format!("创建备份目录失败：{e}"))?;
     Ok(dir.join(flat))
@@ -1142,6 +974,16 @@ fn copy_recursive(from: &Path, to: &Path) -> Result<(), String> {
 /// 把校验结果追加进同一个报告。
 pub fn verify_into(cfg: &Config, vaults: &[&VaultSpec], rep: &mut Report, verbose: bool) {
     for vault in vaults {
+        if !vault.path.is_dir() {
+            rep.push(Record {
+                vault: format!("{} · 校验", vault.name),
+                rel: "库目录".into(),
+                fate: Fate::Skip,
+                method: String::new(),
+                detail: format!("库目录不存在，已跳过：{}", vault.path.display()),
+            });
+            continue;
+        }
         let entries = cfg.entries_for(vault);
         for entry in entries.entries() {
             let kind = entry.kind.resolve(&entry.rel);
@@ -1254,7 +1096,7 @@ pub fn cmd_unlink(cfg: &Config, opts: &Options, out: &Output) -> Result<ExitCode
                     } else {
                         match remove_link(&link_path, method) {
                             Ok(()) => (
-                                Fate::Recreate,
+                                Fate::Remove,
                                 method.label().to_string(),
                                 "已移除".to_string(),
                             ),
@@ -1266,7 +1108,7 @@ pub fn cmd_unlink(cfg: &Config, opts: &Options, out: &Output) -> Result<ExitCode
                     if opts.dry_run {
                         (Fate::Remove, String::new(), "[dry-run] 将移除失效链接".to_string())
                     } else {
-                        match junction::remove_link(&link_path) {
+                        match remove_broken_link(&link_path) {
                             Ok(()) => (Fate::Remove, "失效链接".into(), "已移除".to_string()),
                             Err(e) => (Fate::Fail, String::new(), e),
                         }
@@ -1318,22 +1160,15 @@ pub fn cmd_doctor(opts: &Options, out: &Output) -> Result<ExitCode, String> {
     out.say("== 环境检查 ==");
 
     // 1) 能否创建符号链接
-    let probe_dir = std::env::temp_dir().join(format!("obsidian-sync-probe-{}", std::process::id()));
-    fs::create_dir_all(&probe_dir).map_err(|e| e.to_string())?;
-    let probe_target = probe_dir.join("target.txt");
-    fs::write(&probe_target, b"probe").map_err(|e| e.to_string())?;
-    let probe_link = probe_dir.join("link.txt");
-    let symlink_ok = std::os::windows::fs::symlink_file(&probe_target, &probe_link).is_ok();
+    let symlink_ok = probe_symlink_support();
     if symlink_ok {
         out.say("  OK   可以创建符号链接");
     } else {
         out.say("  ⚠    无法创建符号链接");
-        out.say("       目录项会自动回退为「目录联接」，文件项会失败。");
-        out.say("       解决：以管理员身份运行，或在「设置 → 系统 → 开发者选项」开启开发者模式。");
+        out.say("       Linux 上创建符号链接通常不需要任何特殊权限，该提示一般意味着：");
+        out.say("       所在文件系统不支持符号链接（exFAT/FAT 的 U 盘、部分网络挂载），或目录不可写。");
         problems += 1;
     }
-    fs::remove_file(&probe_link).ok();
-    fs::remove_dir_all(&probe_dir).ok();
 
     // 2) 配置
     let cfg = match load_config(opts) {

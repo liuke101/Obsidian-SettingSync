@@ -142,7 +142,7 @@
   <div class="panel">
     <h2>把新仓库纳入同步</h2>
     <form class="add" id="addForm">
-      <input id="addPath" placeholder="仓库目录，例如 C:\ObsidianVault\Obsidian-New" required>
+      <input id="addPath" placeholder="仓库目录，例如 /home/user/ObsidianVault/Obsidian-New" required>
       <input id="addName" placeholder="库名（留空自动取目录名）">
       <select id="addProfile"><option value="">（不使用配置档）</option></select>
       <button class="primary" type="submit">添加并建立链接</button>
@@ -236,7 +236,7 @@ function render(s){
     env.textContent = '符号链接可用';
   } else {
     env.className = 'badge warn';
-    env.textContent = '符号链接不可用：目录将回退为联接';
+    env.textContent = '符号链接不可用：共享项将无法建立';
   }
 
   const totalLinks = s.vaults.reduce((a,v) => a + v.total, 0);

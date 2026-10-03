@@ -101,4 +101,7 @@ files = [
 "GameDev" = { path = "Obsidian-GameDev" }
 "Misc"    = { path = "Obsidian-Misc" }
 "TechArt" = { path = "Obsidian-TechArt" }
-"Obsidian-Test" = { path = "C:/Users/LiuKe/Desktop/Obsidian-Test" }
+
+# 绝对路径示例（Ubuntu 格式）。本机不存在的库在 link/check 时会自动跳过，
+# 因此多台机器可以共用这份 sync.toml，各登记各的库。
+# "Obsidian-Test" = { path = "/home/lk/Desktop/Obsidian-Test" }

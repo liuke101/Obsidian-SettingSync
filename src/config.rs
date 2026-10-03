@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 /// 共享项：相对于库根目录与共享目录的同名路径。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EntryKind {
-    /// 目录（优先符号链接，失败回退目录联接）
+    /// 目录（符号链接）
     Dir,
     /// 文件（符号链接；失败时若内容可读则接受）
     File,
@@ -23,7 +23,7 @@ impl EntryKind {
     pub fn resolve(self, rel: &str) -> EntryKind {
         match self {
             EntryKind::Auto => {
-                let name = rel.rsplit(['/', '\\']).next().unwrap_or(rel);
+                let name = rel.rsplit('/').next().unwrap_or(rel);
                 if name.contains('.') {
                     EntryKind::File
                 } else {
@@ -77,7 +77,7 @@ impl LinkSet {
 fn dedup_join(a: &[String], b: &[String]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     for item in a.iter().chain(b.iter()) {
-        if !out.iter().any(|x| x.eq_ignore_ascii_case(item)) {
+        if !out.iter().any(|x| x == item) {
             out.push(item.clone());
         }
     }
@@ -123,7 +123,7 @@ pub struct Config {
 
 impl Config {
     pub fn vault_by_name(&self, name: &str) -> Option<&VaultSpec> {
-        self.vaults.iter().find(|v| v.name.eq_ignore_ascii_case(name))
+        self.vaults.iter().find(|v| v.name == name)
     }
 
     /// 被忽略的库名（供 `list` 与界面提示使用）。
@@ -155,22 +155,20 @@ impl Config {
 
 /// 把配置路径转成绝对路径。
 fn absolute_config_path(path: &Path) -> PathBuf {
-    let cleaned = strip_verbatim(path);
     match std::env::current_dir() {
-        Ok(cwd) => absolutize(&cleaned, &cwd),
-        Err(_) => cleaned,
+        Ok(cwd) => absolutize(path, &cwd),
+        Err(_) => path.to_path_buf(),
     }
 }
 
 /// 去掉 `.` 与 `..` 段，输出干净的绝对路径（不访问文件系统）。
 ///
-/// 刻意不使用 `fs::canonicalize`：Windows 上它会返回 `\\?\C:\...` 前缀路径，
-/// 既不便于显示，也让路径字符串比较失配。
+/// 刻意不使用 `fs::canonicalize`：它会解析符号链接并返回真实路径，
+/// 而链接判定需要的是纯词法比较，且不访问文件系统更快也更可预测。
 pub fn normalize(path: &Path) -> PathBuf {
     use std::path::Component;
     let mut out = PathBuf::new();
-    // 根之前的部分（`C:` 与 `\`）不许被 `..` 弹掉，
-    // 否则 `C:\a\..` 会被错误地削成 `C:`。
+    // 根（`/`）不许被 `..` 弹掉，否则 `/a/..` 会被错误地削成空路径。
     let root_prefix: Vec<Component> = path
         .components()
         .take_while(|c| matches!(c, Component::Prefix(_) | Component::RootDir))
@@ -199,15 +197,6 @@ pub fn absolutize(path: &Path, base: &Path) -> PathBuf {
     }
 }
 
-/// 去掉多余的 `\\?\` 前缀（用于读取外部传入的路径）。
-pub fn strip_verbatim(path: &Path) -> PathBuf {
-    let s = path.to_string_lossy();
-    if let Some(rest) = s.strip_prefix(r"\\?\") {
-        return PathBuf::from(rest);
-    }
-    path.to_path_buf()
-}
-
 fn get_str(table: &HashMap<String, Value>, key: &str) -> Option<String> {
     table.get(key).and_then(|v| v.as_str()).map(|s| s.to_string())
 }
@@ -224,26 +213,27 @@ fn get_arr(table: &HashMap<String, Value>, key: &str) -> Vec<String> {
         .unwrap_or_default()
 }
 
-/// 忽略规则匹配：把路径统一成正斜杠小写后比较；支持 `*`（任意字符）与 `?`（单字符）。
+/// 忽略规则匹配：按原始大小写比较（Linux 文件系统大小写敏感）；
+/// 支持匹配目录名（`_backup`）、路径片段（`*/_backup`）以及 `*`、`?` 通配符。
 ///
 /// 规则可以写成目录名（`_backup`、`_*`），也可以写成含分隔符的路径片段
 /// （`*/_backup`）。命中后该对象不参与任何操作——工具不会去动它，也不会删它。
 pub fn matches_ignore(path: &Path, rules: &[String]) -> Option<String> {
-    let full = path.to_string_lossy().replace('\\', "/").to_lowercase();
+    let full = path.to_string_lossy();
     let name = path
         .file_name()
-        .map(|s| s.to_string_lossy().to_lowercase())
+        .map(|s| s.to_string_lossy())
         .unwrap_or_default();
     for rule in rules {
-        let r = rule.trim().replace('\\', "/").to_lowercase();
+        let r = rule.trim();
         if r.is_empty() {
             continue;
         }
         if r.contains('/') {
-            if glob_match(&r, &full) || full.ends_with(&format!("/{r}")) {
+            if glob_match(r, &full) || full.ends_with(&format!("/{r}")) {
                 return Some(rule.clone());
             }
-        } else if glob_match(&r, &name) {
+        } else if glob_match(r, &name) {
             return Some(rule.clone());
         }
         // 名字规则同时作用于**任意一级路径片段**：
@@ -398,26 +388,21 @@ mod path_tests {
     #[test]
     fn normalize_handles_parent_dirs() {
         assert_eq!(
-            normalize(Path::new(r"C:\ObsidianVault\Obsidian-SettingSync\..")),
-            PathBuf::from(r"C:\ObsidianVault")
-        );
-        // 词法解析：`..` 只是消掉前一段，不会"跳过"盘符根
-        assert_eq!(
-            normalize(Path::new(r"C:\ObsidianVault\Obsidian-SettingSync\..")),
-            PathBuf::from(r"C:\ObsidianVault")
+            normalize(Path::new("/home/lk/ObsidianVault/Obsidian-SettingSync/..")),
+            PathBuf::from("/home/lk/ObsidianVault")
         );
         assert_eq!(
-            absolutize(Path::new(".."), Path::new(r"C:\ObsidianVault\Obsidian-SettingSync")),
-            PathBuf::from(r"C:\ObsidianVault")
+            absolutize(Path::new(".."), Path::new("/home/lk/ObsidianVault/Obsidian-SettingSync")),
+            PathBuf::from("/home/lk/ObsidianVault")
         );
         assert_eq!(
-            absolutize(Path::new("Obsidian-AI"), Path::new(r"C:\ObsidianVault")),
-            PathBuf::from(r"C:\ObsidianVault\Obsidian-AI")
+            absolutize(Path::new("Obsidian-AI"), Path::new("/home/lk/ObsidianVault")),
+            PathBuf::from("/home/lk/ObsidianVault/Obsidian-AI")
         );
         // 已经到根之后再 `..` 不应越过根
         assert_eq!(
-            normalize(Path::new(r"C:\..\..\ObsidianVault")),
-            PathBuf::from(r"C:\ObsidianVault")
+            normalize(Path::new("/ObsidianVault/../..")),
+            PathBuf::from("/")
         );
     }
 
@@ -475,7 +460,7 @@ mod link_lifecycle_tests {
             "[general]\nroot = \"{r}\"\nshared_dir = \"{r}/Shared\"\nbackup_dir = \"{r}/_backup\"\n\n\
              [links]\ndirs = [\".obsidian/plugins\", \"zip\"]\nfiles = [\".obsidian/app.json\", \".obsidian/hotkeys.json\"]\n\n\
              [vaults]\n\"V1\" = {{ path = \"{r}/V1\" }}\n",
-            r = root.to_string_lossy().replace('\\', "/")
+            r = root.to_string_lossy()
         );
         fs::write(&config_path, text).unwrap();
 
@@ -517,7 +502,7 @@ mod link_lifecycle_tests {
     /// 幂等：再跑一次不应产生任何改动。
     #[test]
     fn linking_twice_is_idempotent() {
-        let (root, _shared, vault, cfg_path) = setup("idem");
+        let (root, _shared, _vault, cfg_path) = setup("idem");
         let cfg = load(&cfg_path, None).unwrap();
         let v = cfg.vault_by_name("V1").unwrap().clone();
         let mut first = Report::default();
@@ -628,31 +613,34 @@ mod link_lifecycle_tests {
         .collect();
 
         // 点开头的目录一律忽略
-        assert!(matches_ignore(Path::new(r"C:\V\.backup"), &rules).is_some());
-        assert!(matches_ignore(Path::new(r"C:\V\.acl-recovery"), &rules).is_some());
-        assert!(matches_ignore(Path::new(r"C:\V\.git"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/.backup"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/.acl-recovery"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/.git"), &rules).is_some());
         // 旧位置的备份目录与工具仓库
-        assert!(matches_ignore(Path::new(r"C:\V\_backup"), &rules).is_some());
-        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-SettingSync"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/_backup"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-SettingSync"), &rules).is_some());
         // 通配符
-        assert!(matches_ignore(Path::new(r"C:\V\foo.bak"), &rules).is_some());
-        assert!(matches_ignore(Path::new(r"C:\V\desktop.ini"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/foo.bak"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/desktop.ini"), &rules).is_some());
 
         // 正常的库不应被误伤
-        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-AI"), &rules).is_none());
-        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-Config"), &rules).is_none());
-        assert!(matches_ignore(Path::new(r"C:\Users\LiuKe\Desktop\Obsidian-Test"), &rules).is_none());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-AI"), &rules).is_none());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-Config"), &rules).is_none());
 
         // 含分隔符的路径片段写法
         let p = vec!["*/_backup".to_string()];
-        assert!(matches_ignore(Path::new(r"C:\V\_backup"), &p).is_some());
-        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-AI"), &p).is_none());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/_backup"), &p).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-AI"), &p).is_none());
 
         // 名字规则要覆盖任意层级的片段，不只是顶层目录
-        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-SettingSync\src"), &rules).is_some());
-        assert!(matches_ignore(Path::new(r"C:\V\_backup\some\deep\dir"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-SettingSync/src"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/_backup/some/deep/dir"), &rules).is_some());
         // 但正常库的子目录不该被误伤
-        assert!(matches_ignore(Path::new(r"C:\V\Obsidian-AI\notes"), &rules).is_none());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-AI/notes"), &rules).is_none());
+
+        // Linux 文件系统大小写敏感：规则按原始大小写匹配
+        assert!(matches_ignore(Path::new("/home/lk/Vault/Obsidian-SettingSync"), &rules).is_some());
+        assert!(matches_ignore(Path::new("/home/lk/Vault/obsidian-settingsync"), &rules).is_none());
     }
 
     #[test]

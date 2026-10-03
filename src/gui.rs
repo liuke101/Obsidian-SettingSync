@@ -165,16 +165,12 @@ impl AppState {
 }
 
 fn open_url(url: &str) {
-    #[cfg(windows)]
-    {
-        let _ = std::process::Command::new("cmd")
-            .args(["/C", "start", "", url])
-            .spawn();
+    use std::process::Command;
+    // xdg-open 覆盖绝大多数桌面环境；gio 是 GNOME 的后备
+    if Command::new("xdg-open").arg(url).spawn().is_ok() {
+        return;
     }
-    #[cfg(not(windows))]
-    {
-        let _ = std::process::Command::new("xdg-open").arg(url).spawn();
-    }
+    let _ = Command::new("gio").arg("open").arg(url).spawn();
 }
 
 // ------------------------------------------------------------------ HTTP
@@ -283,7 +279,7 @@ fn run_action(action: &str, body: &str, state: &AppState) -> Result<Json, String
                 if let Some((_, rule)) = cfg
                     .ignored_vaults
                     .iter()
-                    .find(|(name, _)| name.eq_ignore_ascii_case(n))
+                    .find(|(name, _)| name == n)
                 {
                     format!("{n} 已被忽略规则 `{rule}` 排除，工具不会对它做任何操作")
                 } else {
@@ -512,7 +508,7 @@ fn urlencode(s: &str) -> String {
 
 fn build_status(state: &AppState) -> Result<Json, String> {
     let cfg = state.load()?;
-    let symlink_ok = symlink_probe();
+    let symlink_ok = crate::probe_symlink_support();
 
     let mut vaults = Vec::new();
     for vault in &cfg.vaults {
@@ -623,20 +619,6 @@ fn build_status(state: &AppState) -> Result<Json, String> {
         ("profiles", Json::arr(profiles)),
         ("vaults", Json::arr(vaults)),
     ]))
-}
-
-fn symlink_probe() -> bool {
-    let dir = std::env::temp_dir().join(format!("obsidian-sync-probe-{}", std::process::id()));
-    if std::fs::create_dir_all(&dir).is_err() {
-        return false;
-    }
-    let target = dir.join("t.txt");
-    let link = dir.join("l.txt");
-    let ok = std::fs::write(&target, b"probe").is_ok()
-        && std::os::windows::fs::symlink_file(&target, &link).is_ok();
-    let _ = std::fs::remove_file(&link);
-    let _ = std::fs::remove_dir_all(&dir);
-    ok
 }
 
 fn report_json(report: &Report) -> Json {
